@@ -129,7 +129,7 @@ def check_notified(a_team, b_team, notified):
 	return False
 
 now = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-message_text = "Time : " + now + " 起動しました Ver." + version
+message_text = "Time : " + now + " 起動しました SLB Ver." + version
 logger.debug(message_text)
 message.send_debug_message(message_text)
 
@@ -365,16 +365,16 @@ while(True):
 							if easy_check(play_timer,a_team,b_team,under,odds) and check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, odds) and not check_notified(a_team,b_team,notified):
 								message.send_debug_message("HIT!")
 								now = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-								message_text = "------------\nベット対象通知\n------------\n"\
-												"[種目]サッカー\n"\
-							                    "[試合]" + a_team + " VS " + b_team +  "\n"\
-							                    "[経過時間]" + play_timer +  "\n"\
-							                    "[ベット対象]Alternative Match Goals\n"\
-							                    "[カウント]" + str(under) + " under\n"\
-							                    "[オッズ]" + str(odds) + "以下\n"\
-							                    "[スコア]" + str(a_team_count) + " - " + str(b_team_count) + "\n"\
-							                    "[時間]" + now + "\n"\
-							                    "[URL]" + browser.current_url
+								message_text = "／\nSLB配信 ベット通知\n＼\n\n"\
+												"【種目】サッカー\n" + a_team + " VS " + b_team +  "\n"\
+							                    "（" + str(a_team_count) + " - " + str(b_team_count) + "）\n"\
+							                    "試合時間：" + play_timer +  "\n\n"\
+							                    "【ベット対象】Alternative Match Goals " + str(under) + " Under\n"\
+							                    "【現在のオッズ】" + str(odds) + "\n"\
+							                    "【配信時刻】" + now + "\n\n"\
+							                    "↓下のURLから、直接ベットしてください。↓\n"\
+							                    "【URL】" + browser.current_url + "\n"\
+							                    "※時間経過により、オッズが微妙に変動している可能性があります。\n\nPowered by SLB."
 								message.send_all_message(message_text)
 								message.send_debug_message(message_text)
 								logger.debug('send Line Message')
