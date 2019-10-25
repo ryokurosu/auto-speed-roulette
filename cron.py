@@ -31,9 +31,9 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.6.13"
+version = "1.6.14"
 
-filter_time = 70;
+filter_time = 65;
 filter_time_after = 88;
 filter_count_under = 4;
 filter_odds = 1.05;
@@ -375,8 +375,13 @@ while(True):
 						for i in range(len(under_array)):
 							under = under_array[i].text
 							odds = odds_array[i].text
-							odds = 1 + float(fractions.Fraction(odds))
-							odds = round(odds,2)
+							if odds is not '':
+								odds = 1 + float(fractions.Fraction(odds))
+								odds = round(odds,2)
+							else:
+								print('odds is empty')
+								continue
+
 							if easy_check(play_timer,a_team,b_team,under,odds) and check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, odds) and not check_notified(a_team,b_team,notified):
 								message.send_debug_message("HIT!")
 								now = datetime.datetime.today().strftime("%Y/%m/%d %H:%M:%S")
