@@ -31,7 +31,7 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.6.12"
+version = "1.6.13"
 
 filter_time = 70;
 filter_time_after = 88;
@@ -262,12 +262,21 @@ while(True):
 				break
 
 			for b in buttons:
-				classname = b.text
-				if 'Soccer' in classname:
-					b.click()
-					logger.debug('go Soccer Page')
-					check = True
-					break
+				try:
+					classname = b.text
+					if 'Soccer' in classname:
+						b.click()
+						logger.debug('go Soccer Page')
+						check = True
+						break
+				except Exception as e:
+					print(traceback.format_exc())
+					pass
+				else:
+					pass
+				finally:
+					pass
+				
 	elif loopcount % 10000 == 0 or loop_stop_count > 30:
 		print(loop_stop_count)
 		browser.get(startURL)
@@ -290,14 +299,20 @@ while(True):
 				break
 
 			for b in buttons:
-				classname = b.text
-				if 'Soccer' in classname:
-					b.click()
-					logger.debug('go Soccer Page')
-					check = True
-					break
-
-		
+				try:
+					classname = b.text
+					if 'Soccer' in classname:
+						b.click()
+						logger.debug('go Soccer Page')
+						check = True
+						break
+				except Exception as e:
+					print(traceback.format_exc())
+					pass
+				else:
+					pass
+				finally:
+					pass
 		pass
 
 	browser.implicitly_wait(3)
