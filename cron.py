@@ -31,9 +31,9 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.6.11"
+version = "1.6.12"
 
-filter_time = 65;
+filter_time = 70;
 filter_time_after = 88;
 filter_count_under = 4;
 filter_odds = 1.05;
@@ -364,17 +364,16 @@ while(True):
 							odds = round(odds,2)
 							if easy_check(play_timer,a_team,b_team,under,odds) and check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, odds) and not check_notified(a_team,b_team,notified):
 								message.send_debug_message("HIT!")
-								now = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+								now = datetime.datetime.today().strftime("%Y/%m/%d %H:%M:%S")
 								message_text = "／\nSLB配信 ベット通知\n＼\n\n"\
 												"【種目】サッカー\n" + a_team + " VS " + b_team +  "\n"\
 							                    "（" + str(a_team_count) + " - " + str(b_team_count) + "）\n"\
 							                    "試合時間：" + play_timer +  "\n\n"\
-							                    "【ベット対象】Alternative Match Goals " + str(under) + " Under\n"\
-							                    "【現在のオッズ】" + str(odds) + "\n"\
-							                    "【配信時刻】" + now + "\n\n"\
-							                    "↓下のURLから、直接ベットしてください。↓\n"\
+							                    "【ベット対象】\nMatch Goals\n" + str(under) + "\nUnder\n\n"\
+							                    "【現在のオッズ】\n" + str(odds) + "\n\n"\
+							                    "下のURLから直接ベットしてください。↓↓\n"\
 							                    "【URL】" + browser.current_url + "\n"\
-							                    "※時間経過により、オッズが微妙に変動している可能性があります。\n\nPowered by SLB."
+							                    "\n※時間経過により、オッズが微妙に変動している可能性があります。\n\nPowered by SLB.\n" + now
 								message.send_all_message(message_text)
 								message.send_debug_message(message_text)
 								logger.debug('send Line Message')
