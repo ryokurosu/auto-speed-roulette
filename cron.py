@@ -31,7 +31,7 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.6.14"
+version = "1.6.15"
 
 filter_time = 65;
 filter_time_after = 88;
@@ -385,15 +385,15 @@ while(True):
 							if easy_check(play_timer,a_team,b_team,under,odds) and check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, odds) and not check_notified(a_team,b_team,notified):
 								message.send_debug_message("HIT!")
 								now = datetime.datetime.today().strftime("%Y/%m/%d %H:%M:%S")
+								googleurl = "https://www.google.com/search?q=" + urllib.parse.quote(a_team + " VS " + b_team)
 								message_text = "／\nSLB配信 ベット通知\n＼\n\n"\
 												"【種目】サッカー\n" + a_team + " VS " + b_team +  "\n"\
-							                    "（" + str(a_team_count) + " - " + str(b_team_count) + "）\n"\
-							                    "試合時間：" + play_timer +  "\n\n"\
+							                    "（" + str(a_team_count) + " - " + str(b_team_count) + "） " + play_timer + "\n"\
 							                    "【ベット対象】\nMatch Goals\n" + str(under) + "\nUnder\n\n"\
-							                    "【現在のオッズ】\n" + str(odds) + "\n\n"\
+							                    "【現在のオッズ】" + str(odds) + "\n\n"\
 							                    "下のURLから直接ベットしてください。↓↓\n"\
-							                    "【URL】" + browser.current_url + "\n"\
-							                    "\n※時間経過により、オッズが微妙に変動している可能性があります。\n\nPowered by SLB.\n" + now
+							                    "【ベットURL】\n" + browser.current_url + "\n"\
+							                    "\n※時間経過により、オッズが微妙に変動している可能性があります。\n\nPowered by SLB.\n" + now + "\n\n試合結果URL：" + googleurl
 								message.send_all_message(message_text)
 								message.send_debug_message(message_text)
 								logger.debug('send Line Message')
