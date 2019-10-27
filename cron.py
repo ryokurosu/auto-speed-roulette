@@ -31,7 +31,7 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.7.0"
+version = "1.7.1"
 
 filter_time = 65;
 filter_time_after = 88;
@@ -43,6 +43,9 @@ browser = ""
 start_time = datetime.datetime.now()
 notified = []
 loopcount = 0
+
+firstURL = "https://mobile.bet365.com/"
+startURL = "https://mobile.bet365.com/?nr=1#/IP/"
 
 
 def logger_set():
@@ -137,8 +140,6 @@ def check_notified(a_team, b_team, notified):
 def start_browser():
 	global browser
 	global start_time
-	firstURL = "https://mobile.bet365.com/"
-	startURL = "https://mobile.bet365.com/?nr=1#/IP/"
 	if browser != "":
 		browser.quit()
 	now = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
@@ -300,6 +301,9 @@ while(True):
 						odds_array = market.find_elements_by_css_selector('.ipe-Column_CSSHook-S10:last-child .ipe-Participant')
 						for i in range(len(under_array)):
 							under = under_array[i].text
+							if len(odds_array) <= i:
+								continue
+
 							odds = odds_array[i].text
 							if odds is not '':
 								odds = 1 + float(fractions.Fraction(odds))
