@@ -142,8 +142,7 @@ def start_browser():
 	global start_time
 	if browser != "":
 		browser.quit()
-	now = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-	message_text = "Time : " + now + " 起動しました SLB Ver." + version
+	message_text = "起動しました SLB Ver." + version + "\n" + datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
 	start_time = datetime.datetime.now()
 	logger.debug(message_text)
 	message.send_debug_message(message_text)
@@ -224,12 +223,6 @@ loop_stop_count = 0
 while(True):
 	loopcount = loopcount + 1
 	logger.debug("Loop Count : " + str(loopcount))
-
-	if start_time <= (datetime.datetime.now() - datetime.timedelta(hours=12)):
-		start_browser()
-		message_text = "メモリ解放のための再起動\n" + datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-		logger.debug(message_text)
-		message.send_debug_message(message_text)
 
 	if loopcount % 30000 == 0:
 		message_text = "正常に稼働中...\n" + datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
