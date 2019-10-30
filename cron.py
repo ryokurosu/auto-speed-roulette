@@ -31,7 +31,7 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.7.1"
+version = "1.7.2"
 
 filter_time = 65;
 filter_time_after = 88;
@@ -166,7 +166,7 @@ def start_browser():
 	else:
 		browser = webdriver.Chrome(os.path.normpath(os.path.join(base, "./chromedriver")),options=options)
 	browser.get("https://www.google.com/?hl=ja")
-	browser.implicitly_wait(3)
+	browser.implicitly_wait(2)
 	browser.get(firstURL)
 	time.sleep(1)
 	browser.get(startURL)
@@ -178,7 +178,16 @@ def soccer_click():
 	check = False
 	for b in browser.find_elements_by_css_selector('.hm-TabletNavButtons_Link'):
 		if "In-Play" in b.text:
-			b.click()
+			try:
+				b.click()
+			except Exception as e:
+				print(traceback.format_exc())
+				pass
+			else:
+				pass
+			finally:
+				pass
+			
 
 	stop_count = 0
 	while(not check):
@@ -193,6 +202,7 @@ def soccer_click():
 			try:
 				classname = b.text
 				if 'Soccer' in classname:
+					time.sleep(3)
 					b.click()
 					logger.debug('go Soccer Page')
 					check = True
@@ -230,10 +240,11 @@ while(True):
 		message.send_debug_message(message_text)
 		logger_set()
 				
-	elif loopcount % 10000 == 0 or loop_stop_count > 30:
+	elif loopcount % 10000 == 0 or loop_stop_count > 15:
 		print(loop_stop_count)
 		logger_set()
 		soccer_click()
+		loop_stop_count = 0
 
 	browser.implicitly_wait(3)
 	skip_count = 0
@@ -267,7 +278,7 @@ while(True):
 		a_team_count = scores[0].text
 		b_team_count = scores[1].text
 		play_timer = row.find_element_by_css_selector('.ipo-Fixture_GameInfo.ipo-Fixture_Time').text
-		if not timer_check(a_team,b_team,a_team_count,b_team_count,play_timer):
+		if not timer_check(a_team,b_team,a_team_count,b_team_count,play_timer) or check_notified(a_team,b_team,notified):
 			continue
 
 		try:
@@ -305,7 +316,7 @@ while(True):
 								print('odds is empty')
 								continue
 
-							if easy_check(play_timer,a_team,b_team,under,odds) and check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, odds) and not check_notified(a_team,b_team,notified):
+							if easy_check(play_timer,a_team,b_team,under,odds) and check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, odds):
 								message.send_debug_message("HIT!")
 								googleurl = "https://www.google.com/search?q=" + urllib.parse.quote(a_team + " VS " + b_team)
 								message_text = "／\nSLB配信 ベット通知\n＼\n\n"\
