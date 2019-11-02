@@ -31,12 +31,13 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.7.2"
+version = "1.8.0"
 
-filter_time = 65;
+filter_time = 73;
 filter_time_after = 88;
 filter_count_under = 4;
-filter_odds = 1.05;
+filter_count_score = 3;
+filter_odds = 1.10;
 filter_count = 5;
 
 browser = ""
@@ -78,8 +79,8 @@ def timer_check(a_team,b_team,a_team_count,b_team_count,play_timer):
 	return True
 
 
-def easy_check(play_timer,a_team,b_team,under,odds):
-	if float(under) < filter_count_under or odds > filter_odds:
+def easy_check(play_timer,a_team,b_team,a_team_count, b_team_count,under,odds):
+	if float(under) < filter_count_under or odds > filter_odds or a_team_count >= filter_count_score or b_team_count >= filter_count_score:
 		now = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
 		message_text = "[Check Rule]\n"\
 		"[種目]サッカー\n"\
@@ -316,7 +317,7 @@ while(True):
 								print('odds is empty')
 								continue
 
-							if easy_check(play_timer,a_team,b_team,under,odds) and check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, odds):
+							if easy_check(play_timer,a_team,b_team,a_team_count, b_team_count,under,odds) and check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, odds):
 								message.send_debug_message("HIT!")
 								googleurl = "https://www.google.com/search?q=" + urllib.parse.quote(a_team + " VS " + b_team)
 								message_text = "／\nSLB配信 ベット通知\n＼\n\n"\
