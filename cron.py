@@ -80,7 +80,7 @@ def timer_check(a_team,b_team,a_team_count,b_team_count,play_timer):
 
 
 def easy_check(play_timer,a_team,b_team,a_team_count, b_team_count,under,odds):
-	if float(under) < filter_count_under or odds > filter_odds or a_team_count >= filter_count_score or b_team_count >= filter_count_score:
+	if float(under) < filter_count_under or odds > filter_odds or a_team_count >= int(filter_count_score) or b_team_count >= int(filter_count_score):
 		now = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
 		message_text = "[Check Rule]\n"\
 		"[種目]サッカー\n"\
