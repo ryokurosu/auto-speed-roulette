@@ -31,7 +31,7 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.8.1"
+version = "1.8.2"
 
 filter_time = 70;
 filter_time_after = 88;
