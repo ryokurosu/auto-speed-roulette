@@ -31,7 +31,7 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.8.2"
+version = "1.8.3"
 
 filter_time = 70;
 filter_time_after = 88;
@@ -241,8 +241,9 @@ while(True):
 		message.send_debug_message(message_text)
 		logger_set()
 				
-	elif loopcount % 10000 == 0 or loop_stop_count > 15:
+	elif loopcount % 5000 == 0 or loop_stop_count > 15:
 		print(loop_stop_count)
+		browser.get(startURL)
 		logger_set()
 		soccer_click()
 		loop_stop_count = 0
@@ -261,7 +262,16 @@ while(True):
 
 	loop_stop_count = 0
 
-	row = rows[row_index]
+	try:
+		row = rows[row_index]
+	except Exception as e:
+		continue
+	else:
+		pass
+	finally:
+		pass
+
+	
 
 	if skip_count > 3:
 		break
