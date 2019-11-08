@@ -192,7 +192,7 @@ def soccer_click():
 
 	stop_count = 0
 	while(not check):
-		logger.debug('Searching Soccer...')
+		logger.debug('Searching Soccer... ' + str(stop_count))
 		buttons = browser.find_elements_by_css_selector('.ipo-ClassificationMenuBase .ipo-Classification')
 		stop_count = stop_count + 1
 		if stop_count > 50:
