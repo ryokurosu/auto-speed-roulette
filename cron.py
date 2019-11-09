@@ -31,10 +31,10 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.8.3"
+version = "1.9.0"
 
 filter_time = 70;
-filter_time_after = 88;
+filter_time_after = 80;
 filter_count_under = 4;
 filter_count_score = 3;
 filter_odds = 1.10;
@@ -45,7 +45,6 @@ start_time = datetime.datetime.now()
 notified = []
 loopcount = 0
 
-firstURL = "https://mobile.bet365.com/"
 startURL = "https://mobile.bet365.com/?nr=1#/IP/"
 
 
@@ -67,20 +66,24 @@ def logger_set():
 def timer_check(a_team,b_team,a_team_count,b_team_count,play_timer):
 	time_array = play_timer.split(':')
 	if int(time_array[0]) < filter_time or int(time_array[0]) > filter_time_after:
-		now = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-		message_text = "[Check Rule]\n"\
-		"[種目]サッカー\n"\
-		"[試合]" + a_team + " VS " + b_team +  "\n"\
-		"[経過時間]" + play_timer +  "\n"\
-		"[ベット対象]Alternative Match Goals\n"\
-		"[時間]" + now + "\n[Jodge]Timer Check"
+		# now = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+		# message_text = "[Check Rule]\n"\
+		# "[種目]サッカー\n"\
+		# "[試合]" + a_team + " VS " + b_team +  "\n"\
+		# "[経過時間]" + play_timer +  "\n"\
+		# "[ベット対象]Alternative Match Goals\n"\
+		# "[時間]" + now + "\n[Jodge]Timer Check"
 		# logger.debug(message_text)
 		return False
 	return True
 
+def count_filter(a_team_count,b_team_count):
+	if int(a_team_count) >= filter_count_score or int(b_team_count) >= filter_count_score:
+		return False
+	return True
 
 def easy_check(play_timer,a_team,b_team,a_team_count, b_team_count,under,odds):
-	if float(under) < filter_count_under or odds > filter_odds or int(a_team_count) >= filter_count_score or int(b_team_count) >= filter_count_score:
+	if odds > filter_odds:
 		now = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
 		message_text = "[Check Rule]\n"\
 		"[種目]サッカー\n"\
@@ -108,25 +111,15 @@ def check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, o
 
 	check = True
 
-	# time_array = play_timer.split(':')
-	# if int(time_array[0]) < filter_time:
-	# 	message_text = message_text + "Status : int(time_array[0]) < " + str(filter_time) + "\n"
-	# 	check =  False
-
 	if float(a_team_count) + float(b_team_count) + filter_count_under > float(under):
 		message_text = message_text + "Status : a_team_count + b_team_count + "+str(filter_count_under) +" > under\n"
 		check = False
-
-	# if odds > filter_odds:
-	# 	message_text = message_text + "Status : odds > " + str(filter_odds) + "\n"
-	# 	check =  False
 
 	if int(a_team_count) + int(b_team_count) >= filter_count:
 		message_text = message_text + "Status : a_team_count + b_team_count >= " + str(filter_count) + "\n"
 		check = False
 
 	logger.debug(message_text)
-	# print(message_text)
 	return check
 
 def check_notified(a_team, b_team, notified):
@@ -168,8 +161,6 @@ def start_browser():
 		browser = webdriver.Chrome(os.path.normpath(os.path.join(base, "./chromedriver")),options=options)
 	browser.get("https://www.google.com/?hl=ja")
 	browser.implicitly_wait(2)
-	browser.get(firstURL)
-	time.sleep(1)
 	browser.get(startURL)
 	logger_set()
 	soccer_click()
@@ -231,7 +222,10 @@ start_browser()
 row_index = 0
 loop_stop_count = 0
 
+# input()
+
 while(True):
+	# start_time = time.time()
 	loopcount = loopcount + 1
 	logger.debug("Loop Count : " + str(loopcount))
 
@@ -248,20 +242,17 @@ while(True):
 		soccer_click()
 		loop_stop_count = 0
 
-	browser.implicitly_wait(3)
-	skip_count = 0
+	browser.implicitly_wait(1)
 
 	rows = browser.find_elements_by_css_selector('.ipo-FixtureList .ipo-Fixture.ipo-Fixture_TimedFixture')
 	if len(rows) == 0:
 		loop_stop_count = loop_stop_count + 1
-		time.sleep(0.1)
 		continue
 	elif len(rows) <= row_index:
 		row_index = 0
 		pass
 
 	loop_stop_count = 0
-
 	try:
 		row = rows[row_index]
 	except Exception as e:
@@ -270,59 +261,52 @@ while(True):
 		pass
 	finally:
 		pass
-
 	
-
-	if skip_count > 3:
-		break
+	gamedata = row.text.split('\n')
 
 	try:
-		if len(row.find_elements_by_css_selector('.ipo-Fixture_Truncator')) < 2 and len(row.find_elements_by_css_selector('.ipo-Participant .ipo-Participant_OppName')) < 2 and len(row.find_elements_by_css_selector('.ipo-Participant .ipo-Participant_OppName')) > 0 and len(row.find_elements_by_css_selector('.ipo-Participant .ipo-Participant_OppOdds')) > 0:
+		if len(gamedata) < 5:
 			skip_count = skip_count + 1
-			browser.implicitly_wait(0.5)
 			continue
-		skip_count = 0
-		teams = row.find_elements_by_css_selector('.ipo-Fixture_Truncator')
-		scores = row.find_elements_by_css_selector('.ipo-Fixture_PointField')
-		a_team = teams[0].text
-		b_team = teams[1].text
-		a_team_count = scores[0].text
-		b_team_count = scores[1].text
-		play_timer = row.find_element_by_css_selector('.ipo-Fixture_GameInfo.ipo-Fixture_Time').text
-		if not timer_check(a_team,b_team,a_team_count,b_team_count,play_timer) or check_notified(a_team,b_team,notified):
+		a_team = gamedata[0]
+		a_team_count = gamedata[1]
+		b_team = gamedata[2]
+		b_team_count = gamedata[3]
+		play_timer = gamedata[4]
+		if not timer_check(a_team,b_team,a_team_count,b_team_count,play_timer) or not count_filter(a_team_count,b_team_count) or check_notified(a_team,b_team,notified):
 			continue
 
 		try:
-			# row が一致しないときのための処理
-			# ↓意味無し
-			# for fixture in browser.find_elements_by_css_selector('.ipo-Fixture.ipo-Fixture_TimedFixture'):
-			# 	teams = fixture.find_elements_by_css_selector('.ipo-Fixture_Truncator')
-			# 	if a_team == teams[0].text and b_team == teams[1].text:
-			# 		fixture.click()
-			# 		break;
 			action = ActionChains(browser)
 			action.move_to_element(row).perform()
 			row.click()
-			time.sleep(0.5)
-
 			title = browser.find_element_by_css_selector('.ipe-EventViewTitle_Text.ipe-EventViewTitle_TextArrow').text
 
 			# row が一致しないときのための処理
 			if a_team in title and b_team in title:
 				print(a_team + " v " + b_team)
 				for market in browser.find_elements_by_css_selector('.ipe-Market'):
-					if "Match Goals" in market.find_element_by_css_selector('.ipe-Market_ButtonText').text:
-						under_array = market.find_elements_by_css_selector('.ipe-Column_Layout-1 .ipe-Participant_Suspended')
-						odds_array = market.find_elements_by_css_selector('.ipe-Column_CSSHook-S10:last-child .ipe-Participant')
+					if "Match Goals" in market.text:
+						market_data = market.text.split('\n')
+						if len(market_data) <= (market_data.index('Under') + 1):
+							break
+						del market_data[0]
+						print(market_data)
+						under_array = market_data[1:market_data.index('Over')]
+						odds_array = market_data[market_data.index('Under') + 1:]
 						for i in range(len(under_array)):
-							under = under_array[i].text
-							if len(odds_array) <= i:
-								continue
-
-							odds = odds_array[i].text
+							under = under_array[i]
+							odds = odds_array[i]
 							if odds is not '':
-								odds = 1 + float(fractions.Fraction(odds))
-								odds = round(odds,2)
+								try:
+									odds = 1 + float(fractions.Fraction(odds))
+									odds = round(odds,2)
+								except Exception as e:
+									continue
+								else:
+									pass
+								finally:
+									pass
 							else:
 								print('odds is empty')
 								continue
@@ -348,8 +332,9 @@ while(True):
 								print("Notified Team List")
 								print(notified)
 								print("=========================")
-								browser.back()
 								break
+						break
+
 			browser.back()
 
 		except Exception as e:
@@ -369,6 +354,8 @@ while(True):
 	finally:
 		row_index = row_index + 1
 		clear_global_key()
+		# elapsed_time = time.time() - start_time
+		# print ("elapsed_time:{0}".format(elapsed_time) + "[sec]")
 		pass
 	continue
 
