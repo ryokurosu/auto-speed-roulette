@@ -31,7 +31,7 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.9.1"
+version = "1.9.2"
 
 filter_time = 70;
 filter_time_after = 80;
@@ -221,6 +221,7 @@ start_browser()
 
 row_index = 0
 loop_stop_count = 0
+skip_count = 0
 
 # input()
 
