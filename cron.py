@@ -31,7 +31,7 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.9.0"
+version = "1.9.1"
 
 filter_time = 70;
 filter_time_after = 80;
@@ -229,15 +229,17 @@ while(True):
 	loopcount = loopcount + 1
 	logger.debug("Loop Count : " + str(loopcount))
 
-	if loopcount % 30000 == 0:
+	if loopcount % 300000 == 0:
 		message_text = "正常に稼働中...\n" + datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
 		logger.debug(message_text)
 		message.send_debug_message(message_text)
 		logger_set()
 				
-	elif loopcount % 5000 == 0 or loop_stop_count > 15:
+	elif loopcount % 30000 == 0 or loop_stop_count > 15:
 		print(loop_stop_count)
 		browser.get(startURL)
+		print('sleep 5 seconds')
+		time.sleep(5)
 		logger_set()
 		soccer_click()
 		loop_stop_count = 0
@@ -255,14 +257,13 @@ while(True):
 	loop_stop_count = 0
 	try:
 		row = rows[row_index]
+		gamedata = row.text.split('\n')
 	except Exception as e:
 		continue
 	else:
 		pass
 	finally:
 		pass
-	
-	gamedata = row.text.split('\n')
 
 	try:
 		if len(gamedata) < 5:
