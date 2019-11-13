@@ -240,11 +240,11 @@ while(True):
 		browser.get(startURL)
 		logger_set()
 		soccer_click()
-	elif loop_stop_count % 15:
+	elif (loop_stop_count + 1) % 15:
 		print(loop_stop_count)
 		browser.get(startURL)
-		print('sleep 30 seconds')
-		time.sleep(30)
+		print('sleep 5 seconds')
+		time.sleep(5)
 		soccer_click()
 
 	browser.implicitly_wait(1)
