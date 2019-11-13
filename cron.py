@@ -31,10 +31,10 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.9.2"
+version = "1.9.3"
 
-filter_time = 70;
-filter_time_after = 80;
+filter_time = 65;
+filter_time_after = 75;
 filter_count_under = 4;
 filter_count_score = 3;
 filter_odds = 1.10;
@@ -236,14 +236,16 @@ while(True):
 		message.send_debug_message(message_text)
 		logger_set()
 				
-	elif loopcount % 30000 == 0 or loop_stop_count > 15:
-		print(loop_stop_count)
+	elif loopcount % 30000 == 0:
 		browser.get(startURL)
-		print('sleep 5 seconds')
-		time.sleep(5)
 		logger_set()
 		soccer_click()
-		loop_stop_count = 0
+	elif loop_stop_count % 15:
+		print(loop_stop_count)
+		browser.get(startURL)
+		print('sleep 30 seconds')
+		time.sleep(30)
+		soccer_click()
 
 	browser.implicitly_wait(1)
 
@@ -341,7 +343,7 @@ while(True):
 
 		except Exception as e:
 			print(traceback.format_exc())
-			browser.get(startURL)
+			# browser.get(startURL)
 		else:
 			pass
 		finally:
