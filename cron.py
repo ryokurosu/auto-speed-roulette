@@ -31,7 +31,7 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.9.3"
+version = "1.9.4"
 
 filter_time = 65;
 filter_time_after = 75;
@@ -226,142 +226,150 @@ skip_count = 0
 # input()
 
 while(True):
-	# start_time = time.time()
-	loopcount = loopcount + 1
-	logger.debug("Loop Count : " + str(loopcount))
-
-	if loopcount % 300000 == 0:
-		message_text = "正常に稼働中...\n" + datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-		logger.debug(message_text)
-		message.send_debug_message(message_text)
-		logger_set()
-				
-	elif loopcount % 30000 == 0:
-		browser.get(startURL)
-		logger_set()
-		soccer_click()
-	elif loop_stop_count  % 15 == 14:
-		print(loop_stop_count)
-		browser.get(startURL)
-		print('sleep 5 seconds')
-		time.sleep(5)
-		soccer_click()
-
-	browser.implicitly_wait(1)
-
-	rows = browser.find_elements_by_css_selector('.ipo-FixtureList .ipo-Fixture.ipo-Fixture_TimedFixture')
-	if len(rows) == 0:
-		loop_stop_count = loop_stop_count + 1
-		continue
-	elif len(rows) <= row_index:
-		row_index = 0
-		pass
-
-	loop_stop_count = 0
 	try:
-		row = rows[row_index]
-		gamedata = row.text.split('\n')
-	except Exception as e:
-		continue
-	else:
-		pass
-	finally:
-		pass
+		loopcount = loopcount + 1
+		logger.debug("Loop Count : " + str(loopcount))
 
-	try:
-		if len(gamedata) < 5:
-			skip_count = skip_count + 1
-			continue
-		a_team = gamedata[0]
-		a_team_count = gamedata[1]
-		b_team = gamedata[2]
-		b_team_count = gamedata[3]
-		play_timer = gamedata[4]
-		if not timer_check(a_team,b_team,a_team_count,b_team_count,play_timer) or not count_filter(a_team_count,b_team_count) or check_notified(a_team,b_team,notified):
-			continue
+		if loopcount % 300000 == 0:
+			message_text = "正常に稼働中...\n" + datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+			logger.debug(message_text)
+			message.send_debug_message(message_text)
+			logger_set()
+					
+		elif loopcount % 30000 == 0:
+			browser.get(startURL)
+			logger_set()
+			soccer_click()
+		elif loop_stop_count  % 15 == 14:
+			print(loop_stop_count)
+			browser.get(startURL)
+			print('sleep 5 seconds')
+			time.sleep(5)
+			soccer_click()
 
+		browser.implicitly_wait(1)
+
+		rows = browser.find_elements_by_css_selector('.ipo-FixtureList .ipo-Fixture.ipo-Fixture_TimedFixture')
+		if len(rows) == 0:
+			loop_stop_count = loop_stop_count + 1
+			continue
+		elif len(rows) <= row_index:
+			row_index = 0
+			pass
+
+		loop_stop_count = 0
 		try:
-			action = ActionChains(browser)
-			action.move_to_element(row).perform()
-			row.click()
-			title = browser.find_element_by_css_selector('.ipe-EventViewTitle_Text.ipe-EventViewTitle_TextArrow').text
-
-			# row が一致しないときのための処理
-			if a_team in title and b_team in title:
-				print(a_team + " v " + b_team)
-				for market in browser.find_elements_by_css_selector('.ipe-Market'):
-					if "Match Goals" in market.text:
-						market_data = market.text.split('\n')
-						if len(market_data) <= (market_data.index('Under') + 1):
-							break
-						del market_data[0]
-						print(market_data)
-						under_array = market_data[1:market_data.index('Over')]
-						odds_array = market_data[market_data.index('Under') + 1:]
-						for i in range(len(under_array)):
-							under = under_array[i]
-							odds = odds_array[i]
-							if odds is not '':
-								try:
-									odds = 1 + float(fractions.Fraction(odds))
-									odds = round(odds,2)
-								except Exception as e:
-									continue
-								else:
-									pass
-								finally:
-									pass
-							else:
-								print('odds is empty')
-								continue
-
-							if easy_check(play_timer,a_team,b_team,a_team_count, b_team_count,under,odds) and check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, odds):
-								message.send_debug_message("HIT!")
-								googleurl = "https://www.google.com/search?q=" + urllib.parse.quote(a_team + " VS " + b_team)
-								message_text = "／\nSLB配信 ベット通知\n＼\n\n"\
-												"【種目】サッカー\n" + a_team + " VS " + b_team +  "\n"\
-							                    "（" + str(a_team_count) + " - " + str(b_team_count) + "） " + play_timer + "\n"\
-							                    "【ベット対象】\nMatch Goals\n" + str(under) + "\nUnder\n\n"\
-							                    "【現在のオッズ】" + str(odds) + "\n\n"\
-							                    "下のURLから直接ベットしてください。↓↓\n"\
-							                    "【ベットURL】\n" + browser.current_url + "\n"\
-							                    "\n※時間経過により、オッズが微妙に変動している可能性があります。\n\nPowered by SLB.\n" + datetime.datetime.today().strftime("%Y/%m/%d %H:%M:%S") + "\n\n試合結果URL：" + googleurl
-								message.send_all_message(message_text)
-								message.send_debug_message(message_text)
-								logger.debug('send Line Message')
-								logger.debug(message_text)
-
-								teamset = [a_team,b_team]
-								notified.append(teamset)
-								print("Notified Team List")
-								print(notified)
-								print("=========================")
-								break
-						break
-
-			browser.back()
-
+			row = rows[row_index]
+			gamedata = row.text.split('\n')
 		except Exception as e:
-			print(traceback.format_exc())
-			# browser.get(startURL)
+			continue
 		else:
 			pass
 		finally:
 			pass
 
+		try:
+			if len(gamedata) < 5:
+				skip_count = skip_count + 1
+				continue
+			a_team = gamedata[0]
+			a_team_count = gamedata[1]
+			b_team = gamedata[2]
+			b_team_count = gamedata[3]
+			play_timer = gamedata[4]
+			if not timer_check(a_team,b_team,a_team_count,b_team_count,play_timer) or not count_filter(a_team_count,b_team_count) or check_notified(a_team,b_team,notified):
+				continue
+
+			try:
+				action = ActionChains(browser)
+				action.move_to_element(row).perform()
+				row.click()
+				title = browser.find_element_by_css_selector('.ipe-EventViewTitle_Text.ipe-EventViewTitle_TextArrow').text
+
+				# row が一致しないときのための処理
+				if a_team in title and b_team in title:
+					print(a_team + " v " + b_team)
+					for market in browser.find_elements_by_css_selector('.ipe-Market'):
+						if "Match Goals" in market.text:
+							market_data = market.text.split('\n')
+							if len(market_data) <= (market_data.index('Under') + 1):
+								break
+							del market_data[0]
+							print(market_data)
+							under_array = market_data[1:market_data.index('Over')]
+							odds_array = market_data[market_data.index('Under') + 1:]
+							for i in range(len(under_array)):
+								under = under_array[i]
+								odds = odds_array[i]
+								if odds is not '':
+									try:
+										odds = 1 + float(fractions.Fraction(odds))
+										odds = round(odds,2)
+									except Exception as e:
+										continue
+									else:
+										pass
+									finally:
+										pass
+								else:
+									print('odds is empty')
+									continue
+
+								if easy_check(play_timer,a_team,b_team,a_team_count, b_team_count,under,odds) and check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, odds):
+									message.send_debug_message("HIT!")
+									googleurl = "https://www.google.com/search?q=" + urllib.parse.quote(a_team + " VS " + b_team)
+									message_text = "／\nSLB配信 ベット通知\n＼\n\n"\
+													"【種目】サッカー\n" + a_team + " VS " + b_team +  "\n"\
+								                    "（" + str(a_team_count) + " - " + str(b_team_count) + "） " + play_timer + "\n"\
+								                    "【ベット対象】\nMatch Goals\n" + str(under) + "\nUnder\n\n"\
+								                    "【現在のオッズ】" + str(odds) + "\n\n"\
+								                    "下のURLから直接ベットしてください。↓↓\n"\
+								                    "【ベットURL】\n" + browser.current_url + "\n"\
+								                    "\n※時間経過により、オッズが微妙に変動している可能性があります。\n\nPowered by SLB.\n" + datetime.datetime.today().strftime("%Y/%m/%d %H:%M:%S") + "\n\n試合結果URL：" + googleurl
+									message.send_all_message(message_text)
+									message.send_debug_message(message_text)
+									logger.debug('send Line Message')
+									logger.debug(message_text)
+
+									teamset = [a_team,b_team]
+									notified.append(teamset)
+									print("Notified Team List")
+									print(notified)
+									print("=========================")
+									break
+							break
+
+				browser.back()
+
+			except Exception as e:
+				print(traceback.format_exc())
+				# browser.get(startURL)
+			else:
+				pass
+			finally:
+				pass
+
+		except Exception as e:
+			skip_count = skip_count + 1
+			print(traceback.format_exc())
+			continue
+		else:
+			pass
+		finally:
+			row_index = row_index + 1
+			clear_global_key()
+			# elapsed_time = time.time() - start_time
+			# print ("elapsed_time:{0}".format(elapsed_time) + "[sec]")
+			pass
+		continue
 	except Exception as e:
-		skip_count = skip_count + 1
 		print(traceback.format_exc())
 		continue
 	else:
 		pass
 	finally:
-		row_index = row_index + 1
-		clear_global_key()
-		# elapsed_time = time.time() - start_time
-		# print ("elapsed_time:{0}".format(elapsed_time) + "[sec]")
 		pass
-	continue
+	# start_time = time.time()
 
 browser.quit()
 sys.exit()
