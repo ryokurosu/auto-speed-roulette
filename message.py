@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# 
 from linebot import (
     LineBotApi, WebhookHandler
 )
@@ -10,6 +13,11 @@ from linebot.models import (
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
+import gspread
+from gspread_dataframe import get_as_dataframe, set_with_dataframe
+from oauth2client.service_account import ServiceAccountCredentials
+import datetime
+
 
 load_dotenv(verbose=True)
 
@@ -21,11 +29,17 @@ handler = WebhookHandler(os.environ.get("CHANNEL_ID"))
 
 debug_line_bot_api = LineBotApi(os.environ.get("DEBUG_ACCESS_TOKEN"))
 
+
+
+
+
 app_env = ""
 if os.environ.get("APP_ENV"):
 	app_env = os.environ.get("APP_ENV")
 else:
 	app_env = "本番用"
+
+
 
 def send_group_message(group_id,message_text):
     try:
@@ -61,7 +75,17 @@ def send_debug_message(message_text):
         pass
     finally:
         pass
-	
+
+def append_sheet_value(rowValue):
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    credentials = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+
+    #OAuth2の資格情報を使用してGoogle APIにログインします。
+    gc = gspread.authorize(credentials)
+    spreadsheetId = '1DnbMdfgYHwR69xeYTvd-LP0YeuHeFC9ZHPDJ7hdTrxQ'
+    sheet = gc.open_by_key(spreadsheetId).worksheet('Result') 
+    sheet.append_row(rowValue)
 
 if __name__ == "__main__":
-    send_all_message('hello')
+    # send_debug_message('hello')
+    append_sheet_value()

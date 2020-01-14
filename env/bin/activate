@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/home/root/app/env"
+VIRTUAL_ENV="/Users/kurosu/linebot-book-slb/env"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

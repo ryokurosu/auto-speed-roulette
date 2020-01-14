@@ -31,7 +31,7 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.9.4"
+version = "2.0.0"
 
 filter_time = 65;
 filter_time_after = 75;
@@ -65,7 +65,7 @@ def logger_set():
 
 def timer_check(a_team,b_team,a_team_count,b_team_count,play_timer):
 	time_array = play_timer.split(':')
-	if int(time_array[0]) < filter_time or int(time_array[0]) > filter_time_after:
+	if time_array[0] == "ET" or int(time_array[0]) < filter_time or int(time_array[0]) > filter_time_after:
 		# now = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
 		# message_text = "[Check Rule]\n"\
 		# "[種目]サッカー\n"\
@@ -328,6 +328,10 @@ while(True):
 								                    "\n※時間経過により、オッズが微妙に変動している可能性があります。\n\nPowered by SLB.\n" + datetime.datetime.today().strftime("%Y/%m/%d %H:%M:%S") + "\n\n試合結果URL：" + googleurl
 									message.send_all_message(message_text)
 									message.send_debug_message(message_text)
+
+									rowValue = [datetime.datetime.today().strftime("%Y/%m/%d %H:%M:%S"), a_team, b_team, a_team_count, b_team_count, play_timer, odds, under]
+									message.append_sheet_value(rowValue)
+
 									logger.debug('send Line Message')
 									logger.debug(message_text)
 
