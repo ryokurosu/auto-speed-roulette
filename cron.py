@@ -277,7 +277,7 @@ while(True):
 			b_team = gamedata[2]
 			b_team_count = gamedata[3]
 			play_timer = gamedata[4]
-			if False and not timer_check(a_team,b_team,a_team_count,b_team_count,play_timer) or not count_filter(a_team_count,b_team_count) or check_notified(a_team,b_team,notified):
+			if not timer_check(a_team,b_team,a_team_count,b_team_count,play_timer) or not count_filter(a_team_count,b_team_count) or check_notified(a_team,b_team,notified):
 				continue
 
 			try:
@@ -315,7 +315,7 @@ while(True):
 									print('odds is empty')
 									continue
 
-								if True or easy_check(play_timer,a_team,b_team,a_team_count, b_team_count,under,odds) and check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, odds):
+								if easy_check(play_timer,a_team,b_team,a_team_count, b_team_count,under,odds) and check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, odds):
 									message.send_debug_message("HIT!")
 									googleurl = "https://www.google.com/search?q=" + urllib.parse.quote(a_team + " VS " + b_team)
 									message_text = "／\nONESTEP ベット通知\n＼\n\n"\
