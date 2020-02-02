@@ -17,6 +17,9 @@ import gspread
 from gspread_dataframe import get_as_dataframe, set_with_dataframe
 from oauth2client.service_account import ServiceAccountCredentials
 import datetime
+import urllib.request
+import urllib.parse
+import json
 
 
 load_dotenv(verbose=True)
@@ -26,6 +29,8 @@ load_dotenv(dotenv_path)
 
 line_bot_api = LineBotApi(os.environ.get("ACCESS_TOKEN"))
 handler = WebhookHandler(os.environ.get("CHANNEL_ID"))
+room_id = os.environ.get("ROOM_ID")
+token = os.environ.get("TOKEN")
 
 debug_line_bot_api = LineBotApi(os.environ.get("DEBUG_ACCESS_TOKEN"))
 
@@ -56,8 +61,21 @@ def send_group_message(group_id,message_text):
 
 def send_all_message(message_text):
     try:
-        line_bot_api.broadcast(TextSendMessage(text=message_text))
+        # line_bot_api.broadcast(TextSendMessage(text=message_text))
+        payload = {'message': message_text}
+        json_data = json.dumps(payload).encode("utf-8")
+        method = "POST"
+        headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+        }
+        request = urllib.request.Request('https://synplace.com/api/mobileapp/rooms/' + room_id + '/post/newmessage',data=json_data,method=method,headers=headers)
+        response = urllib.request.urlopen(request)
+        print(response.getcode())
+        html = response.read()
+        print(html.decode('utf-8'))
     except Exception as e:
+        print(e)
         pass
     else:
         pass
@@ -88,4 +106,4 @@ def append_sheet_value(rowValue):
 
 if __name__ == "__main__":
     # send_debug_message('hello')
-    append_sheet_value()
+    send_all_message('test')

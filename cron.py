@@ -277,7 +277,7 @@ while(True):
 			b_team = gamedata[2]
 			b_team_count = gamedata[3]
 			play_timer = gamedata[4]
-			if not timer_check(a_team,b_team,a_team_count,b_team_count,play_timer) or not count_filter(a_team_count,b_team_count) or check_notified(a_team,b_team,notified):
+			if False and not timer_check(a_team,b_team,a_team_count,b_team_count,play_timer) or not count_filter(a_team_count,b_team_count) or check_notified(a_team,b_team,notified):
 				continue
 
 			try:
@@ -315,17 +315,17 @@ while(True):
 									print('odds is empty')
 									continue
 
-								if easy_check(play_timer,a_team,b_team,a_team_count, b_team_count,under,odds) and check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, odds):
+								if True or easy_check(play_timer,a_team,b_team,a_team_count, b_team_count,under,odds) and check_rules(play_timer, a_team, b_team, a_team_count, b_team_count, under, odds):
 									message.send_debug_message("HIT!")
 									googleurl = "https://www.google.com/search?q=" + urllib.parse.quote(a_team + " VS " + b_team)
-									message_text = "／\nSLB配信 ベット通知\n＼\n\n"\
+									message_text = "／\nONESTEP ベット通知\n＼\n\n"\
 													"【種目】サッカー\n" + a_team + " VS " + b_team +  "\n"\
 								                    "（" + str(a_team_count) + " - " + str(b_team_count) + "） " + play_timer + "\n"\
 								                    "【ベット対象】\nMatch Goals\n" + str(under) + "\nUnder\n\n"\
 								                    "【現在のオッズ】" + str(odds) + "\n\n"\
 								                    "下のURLから直接ベットしてください。↓↓\n"\
 								                    "【ベットURL】\n" + browser.current_url + "\n"\
-								                    "\n※時間経過により、オッズが微妙に変動している可能性があります。\n\nPowered by SLB.\n" + datetime.datetime.today().strftime("%Y/%m/%d %H:%M:%S") + "\n\n試合結果URL：" + googleurl
+								                    "\n※時間経過により、オッズが微妙に変動している可能性があります。\n\nPowered by ONESTEP.\n" + datetime.datetime.today().strftime("%Y/%m/%d %H:%M:%S") + "\n\n試合結果URL：" + googleurl
 									message.send_all_message(message_text)
 									message.send_debug_message(message_text)
 
