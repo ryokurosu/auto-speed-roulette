@@ -39,12 +39,13 @@ password = os.environ.get("PASSWORD")
 
 bot = telegram.Bot(token=os.environ.get("TELEGRAM_TOKEN"))
 chat_id=os.environ.get("TELEGRAM_CHAT_ID")
+debug_chat_id=os.environ.get("TELEGRAM_DEBUG_CHAT_ID")
 
 app_env = ""
 if os.environ.get("APP_ENV"):
-	app_env = os.environ.get("APP_ENV")
+    app_env = os.environ.get("APP_ENV")
 else:
-	app_env = "本番用"
+    app_env = "本番用"
 
 def beep(freq, dur=100):
     if os.name == 'nt':
@@ -75,6 +76,7 @@ def send_all_message(message_text):
     print('*******************')
     try:
         bot.send_message(chat_id=chat_id, text=message_text)
+        send_debug_message(message_text)
     except Exception as e:
         pass
     else:
@@ -109,14 +111,15 @@ def send_all_message(message_text):
 
 def send_debug_message(message_text):
     try:
-        message_text = app_env + "\n" + message_text
-        debug_line_bot_api.broadcast(TextSendMessage(text=message_text))
+        bot.send_message(chat_id=debug_chat_id, text=message_text)
     except Exception as e:
         pass
     else:
         pass
     finally:
         pass
+    
+    return True
 
 def append_sheet_value(rowValue):
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']

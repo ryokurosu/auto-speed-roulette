@@ -119,7 +119,7 @@ def check_is_normal(data):
 		return False
 
 	for x in range(2,len(now)):
-		if now[x] != last[x]:
+		if now[x] != st and now[x] != last[x]:
 			return False
 
 	return True
@@ -131,7 +131,7 @@ def check_is_mirror(data):
 		return False
 
 	for x in range(2,len(now)):
-		if now[x] == last[x - 2]:
+		if now[x] != st and now[x] == last[x - 2]:
 			return False
 
 	return True
@@ -142,7 +142,7 @@ def notice_message(table_name):
 	message.send_all_message(message_text)
 
 def wait_message(table_name):
-	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + " ベットせずLOOKしてください。"
+	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + " ベットせず待機してください。"
 	logger.debug(message_text)
 	message.send_all_message(message_text)
 
@@ -161,7 +161,7 @@ def start_browser():
 	global start_time
 	if browser != "":
 		browser.quit()
-	message_text = "起動しました\nONESTEP Vera Ver." + version + "\n" + datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+	message_text = "\nTYPE VERA Ver." + version + "\n起動しました。\n" + datetime.datetime.today().strftime("%Y/%m/%d %H:%M:%S")
 	start_time = datetime.datetime.now()
 	message.send_debug_message(message_text)
 	base = os.path.dirname(os.path.abspath(__file__))
@@ -431,111 +431,5 @@ while(True):
 		finally:
 			pass
 
-
-
-
-			
-
-
-
-
-# browser.switch_to.frame(browser.find_element_by_css_selector('.gamelayerGameHolder-holder.lazyFrame.loaded'))
-# browser.switch_to.frame(browser.find_element_by_id('game-wrapper'))
-# browser.switch_to.frame(browser.find_element_by_id('evolution_wrapper'))
-
-# iframe_array = browser.find_elements_by_css_selector('.loader-frame-container .games-container > iframe')
-# prev_count = [0] * len(iframe_array)
-# notice_status = [False] * len(iframe_array)
-# can_message = [False] * len(iframe_array)
-# table_name_list = [""] * len(iframe_array)
-# browser.switch_to.frame(iframe_array[0])
-# browser.implicitly_wait(1)
-
-
-# while(True):
-# 	clear_global_key()
-# 	loopcount = loopcount + 1
-# 	logger.debug("Loop Count : " + str(loopcount))
-
-# 	if loopcount % 10000 == 0:
-# 		logger_set()
-
-# 	for i in range(len(iframe_array)):
-
-# 		time.sleep(0.25)
-# 		browser.switch_to.parent_frame()
-# 		browser.switch_to.frame(iframe_array[i])
-
-# 		try:
-# 			idle_divs = browser.find_elements_by_css_selector('div[data-role="inactivity-message-clickable"]')
-# 			if len(idle_divs) > 0:
-# 				browser.execute_script("document.querySelector('div[data-role=\"inactivity-message-clickable\"]').click();")
-# 				continue
-
-# 		except Exception as e:
-# 			pass
-# 		else:
-# 			pass
-# 		finally:
-# 			pass
-
-# 		try:
-# 			if table_name_list[i] == "":
-# 				table_name_list[i] = browser.find_element_by_css_selector('span[data-role="table-name"]').text
-# 				print("supervise on " + table_name_list[i])
-
-# 			result_list = []
-# 			slice_list = []
-# 			roads = browser.find_elements_by_css_selector('svg[data-role="Bead-road"] svg[data-type="roadItem"]')
-# 			if len(roads) == prev_count[i]:
-# 				continue
-
-# 			prev_count[i] = len(roads)
-# 			for svg in roads:
-# 				name = svg.get_attribute('name')
-# 				spl = name.split(' ')
-# 				result_list.append(spl[0])
-# 				pass
-
-# 			if len(result_list) <= array_size or len(result_list) % array_size == 0:
-# 				can_message[i] = True
-# 				# slice_list is needed for 2 columns
-# 				continue
-
-# 			columns_count = math.ceil(len(result_list) / array_size)
-
-# 			for x in range(0,columns_count):
-# 				start = x * array_size
-# 				end = ( x + 1 ) * array_size
-# 				slice_list.append(result_list[start:end])
-# 				pass
-
-# 			if slice_list[-2].count(st) > 0 or result_list.count(st)  >= 4:
-# 				can_message[i] = False
-# 				continue
-
-
-# 			if len(result_list) % array_size == 1:
-# 				check_and_notice(i,table_name_list[i],slice_list)
-# 			else:
-# 				if not check_is_normal(i,table_name_list[i],slice_list):
-# 					if not check_is_mirror(i,table_name_list[i],slice_list):
-# 						if can_message[i] and notice_status[i]:
-# 							message_text = datetime.datetime.today().strftime("%H:%M ") + table_name_list[i] + " ベットせず待機"
-# 							logger.debug(message_text)
-# 							message.send_all_message(message_text)
-# 							can_message[i] = False
-# 						notice_status[i] = False
-
-# 			pass
-# 		except Exception as e:
-# 			print(traceback.format_exc())
-# 		else:
-# 			pass
-# 		finally:
-# 			pass
-
-		
-
-# browser.quit()
-# sys.exit()
+browser.quit()
+sys.exit()
