@@ -2,12 +2,8 @@
 
 ## Mac 版
 
-### python3のインストール
-
-- `sudo xcode-select --install`
-- `/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
-- `brew install python3 git`
-
-## プログラムのインストール
-
-- `git clone https://github.com/ryokurosu/linebot-book-of.git`
++ ダウンロードしてフォルダを開く
++ install.commandの権限変更
++ install.commandを実行（途中パスワード入力）
++ update.commandを実行
++ cron.commandを実行
