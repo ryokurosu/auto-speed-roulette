@@ -20,10 +20,10 @@ import datetime
 import urllib.request
 import urllib.parse
 import json
+import telegram
 
 
 load_dotenv(verbose=True)
-
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
@@ -34,9 +34,11 @@ token = os.environ.get("TOKEN")
 
 debug_line_bot_api = LineBotApi(os.environ.get("DEBUG_ACCESS_TOKEN"))
 
+username = os.environ.get("USERNAME")
+password = os.environ.get("PASSWORD")
 
-
-
+bot = telegram.Bot(token=os.environ.get("TELEGRAM_TOKEN"))
+chat_id=os.environ.get("TELEGRAM_CHAT_ID")
 
 app_env = ""
 if os.environ.get("APP_ENV"):
@@ -44,7 +46,14 @@ if os.environ.get("APP_ENV"):
 else:
 	app_env = "本番用"
 
-
+def beep(freq, dur=100):
+    if os.name == 'nt':
+        # Windowsの場合は、winsoundというPython標準ライブラリを使います.
+        import winsound
+        winsound.Beep(freq, dur)
+    else:
+        # Macの場合には、Macに標準インストールされたplayコマンドを使います.
+        os.system('afplay /System/Library/Sounds/Submarine.aiff')
 
 def send_group_message(group_id,message_text):
     try:
@@ -60,6 +69,21 @@ def send_group_message(group_id,message_text):
     
 
 def send_all_message(message_text):
+    beep(2000,500)
+    print('*******************')
+    print(message_text)
+    print('*******************')
+    try:
+        bot.send_message(chat_id=chat_id, text=message_text)
+    except Exception as e:
+        pass
+    else:
+        pass
+    finally:
+        pass
+    
+    return True
+    
     try:
         # line_bot_api.broadcast(TextSendMessage(text=message_text))
         payload = {'message': message_text}
