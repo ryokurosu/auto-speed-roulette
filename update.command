@@ -6,6 +6,7 @@ cd $PROG_DIR
 
 git fetch
 git reset --hard origin/master
+rm chromedriver
 wget -P $PROG_DIR https://chromedriver.storage.googleapis.com/80.0.3987.106/chromedriver_mac64.zip
 unzip chromedriver_mac64.zip
 rm chromedriver_mac64.zip
