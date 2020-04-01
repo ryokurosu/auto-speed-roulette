@@ -90,6 +90,7 @@ def login():
 def go_to_live():
 	browser.get(liveURL)
 	time.sleep(15)
+	browser.execute_script("document.body.style.zoom='70%'")
 	WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.gamelayerGameHolder-holder.lazyFrame.loaded')))
 	browser.switch_to.frame(browser.find_element_by_css_selector('.gamelayerGameHolder-holder.lazyFrame.loaded'))
 	WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.ID, 'game-wrapper')))
