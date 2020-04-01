@@ -89,8 +89,9 @@ def login():
 
 def go_to_live():
 	browser.get(liveURL)
+	time.sleep(4)
+	browser.find_element_by_tag_name("html").send_keys(Keys.CONTROL, Keys.SUBTRACT)
 	time.sleep(15)
-	browser.execute_script("document.body.style.zoom='25%'")
 	WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.gamelayerGameHolder-holder.lazyFrame.loaded')))
 	browser.switch_to.frame(browser.find_element_by_css_selector('.gamelayerGameHolder-holder.lazyFrame.loaded'))
 	WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.ID, 'game-wrapper')))
@@ -227,7 +228,8 @@ def start_browser():
 		browser = webdriver.Chrome(os.path.normpath(os.path.join(base, "./chromedriver.exe")),options=options)
 	else:
 		browser = webdriver.Chrome(os.path.normpath(os.path.join(base, "./chromedriver")),options=options)
-	browser.maximize_window()
+	# browser.maximize_window()
+	browser.set_window_size(1920,1440)
 	login()
 
 
