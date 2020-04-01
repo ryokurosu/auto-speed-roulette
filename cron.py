@@ -275,6 +275,9 @@ def result_data_slice(result_list):
 
 def is_skip(i,result_list,slice_list):
 
+	if try_count[i] > 3:
+		return False
+
 	if len(slice_list) <= 1:
 		#1列目である
 		return True
@@ -294,7 +297,7 @@ def is_skip(i,result_list,slice_list):
 		#タイが4つ以上
 		return True
 	
-	if try_count[i] <= 4 and now[:3].count(st) > 0:
+	if now[:3].count(st) > 0:
 		#1~3つめにタイ
 		return True
 
