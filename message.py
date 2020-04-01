@@ -23,6 +23,7 @@ import json
 import telegram
 
 
+
 load_dotenv(verbose=True)
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -76,7 +77,6 @@ def send_all_message(message_text):
     print('*******************')
     try:
         bot.send_message(chat_id=chat_id, text=message_text)
-        send_debug_message(message_text)
     except Exception as e:
         pass
     else:
