@@ -89,8 +89,6 @@ def login():
 
 def go_to_live():
 	browser.get(liveURL)
-	time.sleep(4)
-	browser.find_element_by_tag_name("html").send_keys(Keys.CONTROL, Keys.SUBTRACT)
 	time.sleep(15)
 	WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.gamelayerGameHolder-holder.lazyFrame.loaded')))
 	browser.switch_to.frame(browser.find_element_by_css_selector('.gamelayerGameHolder-holder.lazyFrame.loaded'))
@@ -162,8 +160,19 @@ def check_before_row_4_martin(data,bet_type):
 
 	return False
 
+def check_after_4_martin(data):
+	now = data[-1]
+	last = data[-2]
+	for x in range(0,len(now)):
+		if now[x] != st and now[x] != last[x]:
+			return False
+
+	return True
+
+
+
 def notice_message(table_name,slice_list):
-	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + " べット準備してください。"
+	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + " べット準備してください。"
 	logger.debug(message_text)
 	message.send_all_message(message_text)
 	debug_message_text = message_text
@@ -173,7 +182,7 @@ def notice_message(table_name,slice_list):
 	message.send_debug_message(debug_message_text)
 
 def wait_message(table_name,slice_list):
-	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + " ベットせず待機してください。"
+	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + " ベットせず待機してください。"
 	logger.debug(message_text)
 	message.send_all_message(message_text)
 	debug_message_text = message_text
@@ -183,7 +192,7 @@ def wait_message(table_name,slice_list):
 	message.send_debug_message(debug_message_text)
 
 def bet_message(table_name,bet_position,slice_list,try_count):
-	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + " " + bet_position + " " + str(try_count)
+	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + " " + bet_position + " " + str(try_count)
 	logger.debug(message_text)
 	message.send_all_message(message_text)
 	debug_message_text = message_text
@@ -193,10 +202,10 @@ def bet_message(table_name,bet_position,slice_list,try_count):
 	message.send_debug_message(debug_message_text)
 
 def win_message(table_name,slice_list):
-	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + " 勝ち" 
+	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + " 勝ち" 
 	logger.debug(message_text)
 	message.send_all_message(message_text)
-	debug_message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + " 勝ち（" + str(total_games) + "戦" + str(win_games) + "勝中）" 
+	debug_message_text = message_text + "（" + str(total_games) + "戦" + str(win_games) + "勝中）" 
 	for x in slice_list:
 		debug_message_text = debug_message_text + "\n" + ' '.join(x)
 		pass
@@ -402,13 +411,18 @@ while(True):
 
 			now = slice_list[-1]
 
+			if try_count[i] == 1:
+				#ゲーム数の計測
+				total_games = total_games + 1
+
 			if is_skip(i,result_list,slice_list):
 				if is_betting[i]:
 					wait_message(table_name,slice_list)
 					is_betting[i] = False
-					if len(now) == 3 and str(now[2]) == st:
+					if try_count[i] > 0:
 						#試合数にカウントしない
 						total_games = total_games - 1
+					try_count[i] = 0
 				continue
 
 			
@@ -431,7 +445,6 @@ while(True):
 
 				if bet_type[i] == type_normal:
 					if check_is_normal(slice_list):
-						total_games = total_games + 1
 						bet_position = reverse_bet[last[slice_l]]
 						try_count[i] = try_count[i] + 1
 						bet_message(table_name,bet_position,slice_list,try_count[i])
@@ -442,9 +455,7 @@ while(True):
 
 
 				if bet_type[i] == type_mirror and check_is_mirror(slice_list):
-					#ゲーム数の計測
-					total_games = total_games + 1
-					bet_position = normal_bet(last[slice_l - 2])
+					bet_position = normal_bet[last[slice_l - 2]]
 					try_count[i] = try_count[i] + 1
 					bet_message(table_name,bet_position,slice_list,try_count[i])
 					continue
@@ -464,7 +475,7 @@ while(True):
 					continue
 
 				if bet_type[i] == type_mirror and check_is_mirror(slice_list):
-					bet_position = normal_bet(last[slice_l - 2])
+					bet_position = normal_bet[last[slice_l - 2]]
 					try_count[i] = try_count[i] + 1
 					bet_message(table_name,bet_position,slice_list,try_count[i])
 					continue
@@ -477,7 +488,7 @@ while(True):
 
 			elif is_betting[i] and try_count[i] == 4:
 
-				if not check_before_row_4_martin(slice_list,bet_type[i]):
+				if check_before_row_4_martin(slice_list,bet_type[i]):
 					bet_position = reverse_bet[last[0]]
 					try_count[i] = try_count[i] + 1
 					bet_message(table_name,bet_position,slice_list,try_count[i])
@@ -489,36 +500,14 @@ while(True):
 				win_games = win_games + 1
 				win_message(table_name,slice_list)
 
-			elif is_betting[i] and try_count[i] == 5:
 
-				if now[0] != st and now[0] != last[0]:
-					#逆張り
-					is_betting[i] = False
-					bet_type[i] = type_normal
-					try_count[i] =  0
-					win_games = win_games + 1
-					win_message(table_name,slice_list)
-					continue
+			elif is_betting[i] and try_count[i] >= 5 and try_count[i] <= 8:
 
-				bet_type[i] = notice_check(slice_list)
-				bet_position = reverse_bet[last[1]]
-				try_count[i] = try_count[i] + 1
-				bet_message(table_name,bet_position,slice_list,try_count[i])
-
-			elif is_betting[i] and try_count[i] >= 6 and try_count[i] <= 8:
-
-				if bet_type[i] == type_normal and check_is_normal(slice_list):
+				if check_after_4_martin(slice_list):
 					bet_position = reverse_bet[last[slice_l]]
 					try_count[i] = try_count[i] + 1
 					bet_message(table_name,bet_position,slice_list,try_count[i])
 					continue
-
-				if bet_type[i] == type_mirror and check_is_mirror(slice_list):
-					bet_position = normal_bet(last[slice_l - 2])
-					try_count[i] = try_count[i] + 1
-					bet_message(table_name,bet_position,slice_list,try_count[i])
-					continue
-
 				is_betting[i] = False
 				bet_type[i] = type_normal
 				try_count[i] =  0
@@ -530,6 +519,7 @@ while(True):
 					lose_message(table_name,slice_list)
 				is_betting[i] = False
 				bet_type[i] = type_normal
+				try_count[i] = 0
 
 		except Exception as e:
 			print(traceback.format_exc())
