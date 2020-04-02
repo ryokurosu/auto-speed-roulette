@@ -34,7 +34,7 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
 
-version = "1.0.1"
+version = "1.0.2"
 array_size = 6
 dataset_x = 40
 dataset_y = 6
@@ -150,9 +150,6 @@ def check_is_mirror(data):
 	return True
 
 def check_before_row_4_martin(data,bet_type):
-	now = data[-1]
-	last = data[-2]
-
 	if bet_type == type_normal:
 		return check_is_normal(data)
 	elif bet_type == type_mirror:
@@ -172,7 +169,7 @@ def check_after_4_martin(data):
 
 
 def notice_message(table_name,slice_list):
-	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + " べット準備してください。"
+	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + "\nべット準備してください。"
 	logger.debug(message_text)
 	message.send_all_message(message_text)
 	debug_message_text = message_text
@@ -182,7 +179,7 @@ def notice_message(table_name,slice_list):
 	message.send_debug_message(debug_message_text)
 
 def wait_message(table_name,slice_list):
-	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + " ベットせず待機してください。"
+	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + "\nベットせず待機してください。"
 	logger.debug(message_text)
 	message.send_all_message(message_text)
 	debug_message_text = message_text
@@ -192,7 +189,7 @@ def wait_message(table_name,slice_list):
 	message.send_debug_message(debug_message_text)
 
 def bet_message(table_name,bet_position,slice_list,try_count):
-	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + " " + bet_position + " " + str(try_count)
+	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + "\n" + bet_position + " " + str(try_count)
 	logger.debug(message_text)
 	message.send_all_message(message_text)
 	debug_message_text = message_text
@@ -202,7 +199,7 @@ def bet_message(table_name,bet_position,slice_list,try_count):
 	message.send_debug_message(debug_message_text)
 
 def win_message(table_name,slice_list):
-	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + " 勝ち" 
+	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + "\n勝ち" 
 	logger.debug(message_text)
 	message.send_all_message(message_text)
 	debug_message_text = message_text + "（" + str(total_games) + "戦" + str(win_games) + "勝中）" 
@@ -211,8 +208,19 @@ def win_message(table_name,slice_list):
 		pass
 	message.send_debug_message(debug_message_text)
 
+def game_1_wait_message(table_name,slice_list,try_count):
+	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + "\n1ゲームベットせず待機してください。 " + str(try_count)
+	logger.debug(message_text)
+	message.send_all_message(message_text)
+	debug_message_text = message_text
+	for x in slice_list:
+		debug_message_text = debug_message_text + "\n" + ' '.join(x)
+		pass
+	message.send_debug_message(debug_message_text)
+
+
 def lose_message(table_name,slice_list):
-	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + " 負け" 
+	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\n負け" 
 	logger.debug(message_text)
 	debug_message_text = message_text
 	for x in slice_list:
@@ -233,6 +241,7 @@ def start_browser():
 	options.add_argument('--no-sandbox')
 	options.add_argument('--lang=ja-JP')
 	options.add_argument('--incognito')
+
 	if os.name == 'nt':
 		browser = webdriver.Chrome(os.path.normpath(os.path.join(base, "./chromedriver.exe")),options=options)
 	else:
@@ -285,10 +294,7 @@ def result_data_slice(result_list):
 		pass
 	return slice_list
 
-def is_skip(i,result_list,slice_list):
-
-	if try_count[i] > 3:
-		return False
+def is_skip(result_list,slice_list):
 
 	if len(slice_list) <= 1:
 		#1列目である
@@ -301,18 +307,14 @@ def is_skip(i,result_list,slice_list):
 	now = slice_list[-1]
 	last = slice_list[-2]
 
-	if last.count(st) > 0:
-		#前列がタイ
+	if last.count(st) > 0 or now.count(st) > 0:
+		#前列・今列がタイ
 		return True
 	
 	if result_list.count(st) - now.count(st) >= 4:
 		#タイが4つ以上
 		return True
 	
-	if now[:3].count(st) > 0:
-		#1~3つめにタイ
-		return True
-
 	check = True
 	for x in range(1,5):
 		if last[x] != st and last[x] == last[x - 1] and last[x] == last[x + 1]:
@@ -328,7 +330,7 @@ WebDriverWait(browser, 60).until(EC.presence_of_element_located((By.CSS_SELECTOR
 tables = browser.find_elements_by_css_selector('div[data-game="baccarat"]')
 is_betting = [False] * len(tables)
 try_count = [0] * len(tables)
-prev_count = [0] * len(tables)
+prev_count = [None] * len(tables)
 bet_type = [type_normal] * len(tables)
 
 while(True):
@@ -342,18 +344,18 @@ while(True):
 		WebDriverWait(browser, 60).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-game="baccarat"]')))
 		tables = browser.find_elements_by_css_selector('div[data-game="baccarat"]')
 		is_betting = [False] * len(tables)
-		prev_count = [0] * len(tables)
+		prev_count = [None] * len(tables)
 		try_count = [0] * len(tables)
 		bet_type = [type_normal] * len(tables)
 		logger_set()
 		continue
 
-	if is_betting.count(True) == 0 and (time.time() - start) > 1500:
+	if is_betting.count(True) == 0 and (time.time() - start) > 1250:
 		go_to_live()
 		WebDriverWait(browser, 60).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-game="baccarat"]')))
 		tables = browser.find_elements_by_css_selector('div[data-game="baccarat"]')
 		is_betting = [False] * len(tables)
-		prev_count = [0] * len(tables)
+		prev_count = [None] * len(tables)
 		try_count = [0] * len(tables)
 		bet_type = [type_normal] * len(tables)
 		start = time.time()
@@ -365,22 +367,26 @@ while(True):
 
 	for i in range(len(tables)):
 		try:
-			pass
-		
 			table = tables[i]
 			div_tablename = table.find_element_by_css_selector('div[data-role="table-name"]')
 			if not div_tablename or not check_table_name(div_tablename.text):
 				continue
 
 			table_name = div_tablename.text
+			road_item_colors = table.find_elements_by_css_selector('g[data-type="roadItemColor"]')
+			tmp = table.text.split("\n")
+			tmp_tuple = tuple([len(road_item_colors)]) + tuple(tmp[1:-3])
+
 			svgs = table.find_elements_by_css_selector('svg[data-role="Big-road"] svg[data-type="coordinates"]')
 
-			if prev_count[i] == len(svgs):
-				#配列数が変わらない時はスキップ タイの時も変わらないので不要
+			if prev_count[i] == tmp_tuple:
+				#最後同じ場合・変わらない時はスキップ
 				continue
-			prev_count[i] = len(svgs)
+			prev_count[i] = tmp_tuple
 
 			dataset = [[None] * dataset_y for k in range(dataset_x)]
+
+			
 
 			for svg in svgs:
 				additem = ()
@@ -403,6 +409,9 @@ while(True):
 				dataset[int(svg.get_attribute('data-x'))][int(svg.get_attribute('data-y'))] = additem
 
 			result_list = from_dataset_to_result(dataset)
+
+			
+
 			slice_list = result_data_slice(result_list)
 
 			if len(slice_list) == 0:
@@ -415,14 +424,7 @@ while(True):
 				#ゲーム数の計測
 				total_games = total_games + 1
 
-			if is_skip(i,result_list,slice_list):
-				if is_betting[i]:
-					wait_message(table_name,slice_list)
-					is_betting[i] = False
-					if try_count[i] > 0:
-						#試合数にカウントしない
-						total_games = total_games - 1
-					try_count[i] = 0
+			if not is_betting[i] and is_skip(result_list,slice_list):
 				continue
 
 			
@@ -468,6 +470,13 @@ while(True):
 
 			elif is_betting[i] and try_count[i] <= 3:
 
+				if ( try_count[i] == 1 or try_count[i] == 2 ) and now[slice_l - 1] == st:
+					wait_message(table_name,slice_list)
+					is_betting[i] = False
+					total_games = total_games - 1
+					try_count[i] = 0
+					continue
+
 				if bet_type[i] == type_normal and check_is_normal(slice_list):
 					bet_position = reverse_bet[last[slice_l]]
 					try_count[i] = try_count[i] + 1
@@ -489,7 +498,7 @@ while(True):
 			elif is_betting[i] and try_count[i] == 4:
 
 				if check_before_row_4_martin(slice_list,bet_type[i]):
-					bet_position = reverse_bet[last[0]]
+					bet_position = reverse_bet[now[0]]
 					try_count[i] = try_count[i] + 1
 					bet_message(table_name,bet_position,slice_list,try_count[i])
 					continue
@@ -508,11 +517,18 @@ while(True):
 					try_count[i] = try_count[i] + 1
 					bet_message(table_name,bet_position,slice_list,try_count[i])
 					continue
+				elif last[slice_l] == st:
+					#前列がタイ
+					try_count[i] = try_count[i] + 1
+					game_1_wait_message(table_name,slice_list,try_count[i])
+					continue
+					
 				is_betting[i] = False
 				bet_type[i] = type_normal
 				try_count[i] =  0
 				win_games = win_games + 1
 				win_message(table_name,slice_list)
+
 
 			elif try_count[i] == 9:
 				if is_betting[i]:
