@@ -68,7 +68,7 @@ reverse_bet[st] = st
 type_normal = 'normal'
 type_mirror = 'mirror'
 # use_tables = ["バカラ A","バカラ B","バカラ C","バカラスクイーズ","バカラコントロールスクイーズ"]
-use_tables = ["スピードバカラ A","スピードバカラ B","スピードバカラ C","バカラ A","バカラ B","バカラ C","バカラスクイーズ","バカラコントロールスクイーズ"]
+use_tables = ["バカラ A","バカラ B","バカラ C","バカラスクイーズ","バカラコントロールスクイーズ"]
 
 total_games = 0
 win_games = 0
