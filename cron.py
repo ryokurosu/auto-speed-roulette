@@ -169,58 +169,54 @@ def check_after_4_martin(data):
 
 
 def notice_message(table_name,slice_list):
-	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + "\nべット準備してください。"
-	logger.debug(message_text)
+	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\nべット準備してください。"
 	message.send_all_message(message_text)
-	debug_message_text = message_text
-	for x in slice_list:
-		debug_message_text = debug_message_text + "\n" + ' '.join(x)
-		pass
-	message.send_debug_message(debug_message_text)
+	debug_result(message_text,slice_list)
 
-def wait_message(table_name,slice_list):
-	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + "\nベットせず待機してください。"
-	logger.debug(message_text)
+def wait_message(i,table_name,slice_list):
+	try_count[i] = 0
+	is_betting[i] = False
+	bet_type[i] = type_normal
+	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\nベットせず待機してください。"
 	message.send_all_message(message_text)
-	debug_message_text = message_text
-	for x in slice_list:
-		debug_message_text = debug_message_text + "\n" + ' '.join(x)
-		pass
-	message.send_debug_message(debug_message_text)
+	debug_result(message_text,slice_list)
+
+def shuffle_wait_message(i,table_name,slice_list):
+	try_count[i] = 0
+	is_betting[i] = False
+	bet_type[i] = type_normal
+	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\nシャッフルの為ベットせず待機してください。"
+	message.send_all_message(message_text)
+	debug_result(message_text,slice_list)
+
+def tie_wait_message(i,table_name,slice_list):
+	try_count[i] = 0
+	is_betting[i] = False
+	bet_type[i] = type_normal
+	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\nタイの為ベットせず待機してください。"
+	message.send_all_message(message_text)
+	debug_result(message_text,slice_list)
 
 def bet_message(table_name,bet_position,slice_list,try_count):
-	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + "\n" + bet_position + " " + str(try_count)
-	logger.debug(message_text)
+	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\n" + bet_position + " " + str(try_count)
 	message.send_all_message(message_text)
-	debug_message_text = message_text
-	for x in slice_list:
-		debug_message_text = debug_message_text + "\n" + ' '.join(x)
-		pass
-	message.send_debug_message(debug_message_text)
+	debug_result(message_text,slice_list)
 
 def win_message(table_name,slice_list):
-	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + "\n勝ち" 
-	logger.debug(message_text)
+	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\n勝ち" 
 	message.send_all_message(message_text)
-	debug_message_text = message_text + "（" + str(total_games) + "戦" + str(win_games) + "勝中）" 
-	for x in slice_list:
-		debug_message_text = debug_message_text + "\n" + ' '.join(x)
-		pass
-	message.send_debug_message(debug_message_text)
+	debug_result(message_text,slice_list)
 
 def game_1_wait_message(table_name,slice_list,try_count):
-	message_text = datetime.datetime.today().strftime("%H:%M\n") + table_name + "\n1ゲームベットせず待機してください。 " + str(try_count)
-	logger.debug(message_text)
+	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\n1ゲームベットせず待機してください。 " + str(try_count)
 	message.send_all_message(message_text)
-	debug_message_text = message_text
-	for x in slice_list:
-		debug_message_text = debug_message_text + "\n" + ' '.join(x)
-		pass
-	message.send_debug_message(debug_message_text)
-
+	debug_result(message_text,slice_list)
 
 def lose_message(table_name,slice_list):
 	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\n負け" 
+	debug_result(message_text,slice_list)
+
+def debug_result(message_text,slice_list):
 	logger.debug(message_text)
 	debug_message_text = message_text
 	for x in slice_list:
@@ -409,13 +405,12 @@ while(True):
 				dataset[int(svg.get_attribute('data-x'))][int(svg.get_attribute('data-y'))] = additem
 
 			result_list = from_dataset_to_result(dataset)
-
-			
-
 			slice_list = result_data_slice(result_list)
 
 			if len(slice_list) == 0:
 				#dataが0個
+				if try_count[i] > 0:
+					shuffle_wait_message(i,table_name,slice_list)
 				continue
 
 			now = slice_list[-1]
@@ -462,19 +457,16 @@ while(True):
 					bet_message(table_name,bet_position,slice_list,try_count[i])
 					continue
 
-				wait_message(table_name,slice_list)
-				try_count[i] = 0
-				is_betting[i] = False
-				bet_type[i] = type_normal
+				wait_message(i,table_name,slice_list)
 				continue
 
 			elif is_betting[i] and try_count[i] <= 3:
 
-				if ( try_count[i] == 1 or try_count[i] == 2 ) and now[slice_l - 1] == st:
-					wait_message(table_name,slice_list)
-					is_betting[i] = False
-					total_games = total_games - 1
-					try_count[i] = 0
+				if now[slice_l - 1] == st:
+					if try_count[i] == 1:
+						wait_message(i,table_name,slice_list)
+					elif try_count[i] == 2:
+						tie_wait_message(i,table_name,slice_list)
 					continue
 
 				if bet_type[i] == type_normal and check_is_normal(slice_list):
