@@ -217,6 +217,7 @@ def lose_message(table_name,slice_list):
 	debug_result(message_text,slice_list)
 
 def debug_result(message_text,slice_list):
+	message_text = message_text + "（" + total_games + "戦" + win_games + "勝中）"
 	logger.debug(message_text)
 	debug_message_text = message_text
 	for x in slice_list:
