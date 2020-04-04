@@ -183,6 +183,7 @@ def wait_message(i,table_name,slice_list):
 	debug_result(message_text,slice_list)
 
 def shuffle_wait_message(i,table_name,slice_list):
+	shuffle_games = shuffle_games + 1
 	try_count[i] = 0
 	is_betting[i] = False
 	bet_type[i] = type_normal
@@ -191,6 +192,7 @@ def shuffle_wait_message(i,table_name,slice_list):
 	debug_result(message_text,slice_list)
 
 def tie_wait_message(i,table_name,slice_list):
+	tie_games = tie_games + 1
 	try_count[i] = 0
 	is_betting[i] = False
 	bet_type[i] = type_normal
@@ -204,6 +206,7 @@ def bet_message(table_name,bet_position,slice_list,try_count):
 	debug_result(message_text,slice_list)
 
 def win_message(table_name,slice_list):
+	win_games = win_games + 1
 	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\n勝ち" 
 	message.send_all_message(message_text)
 	debug_result(message_text,slice_list)
@@ -412,7 +415,6 @@ while(True):
 			if len(slice_list) == 0:
 				#dataが0個
 				if try_count[i] > 0:
-					shuffle_games = shuffle_games + 1
 					shuffle_wait_message(i,table_name,slice_list)
 				continue
 
@@ -466,11 +468,7 @@ while(True):
 			elif is_betting[i] and try_count[i] <= 3:
 
 				if now[slice_l - 1] == st:
-					if try_count[i] == 1:
-						tie_games = tie_games + 1
-						wait_message(i,table_name,slice_list)
-					elif try_count[i] == 2:
-						tie_games = tie_games + 1
+					if try_count[i] == 1 or try_count[i] == 2:
 						tie_wait_message(i,table_name,slice_list)
 					continue
 
@@ -489,7 +487,6 @@ while(True):
 				is_betting[i] = False
 				bet_type[i] = type_normal
 				try_count[i] =  0
-				win_games = win_games + 1
 				win_message(table_name,slice_list)
 
 			elif is_betting[i] and try_count[i] == 4:
@@ -503,7 +500,6 @@ while(True):
 				is_betting[i] = False
 				bet_type[i] = type_normal
 				try_count[i] =  0
-				win_games = win_games + 1
 				win_message(table_name,slice_list)
 
 
@@ -523,7 +519,6 @@ while(True):
 				is_betting[i] = False
 				bet_type[i] = type_normal
 				try_count[i] =  0
-				win_games = win_games + 1
 				win_message(table_name,slice_list)
 
 
