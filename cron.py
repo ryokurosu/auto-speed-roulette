@@ -183,6 +183,7 @@ def wait_message(i,table_name,slice_list):
 	debug_result(message_text,slice_list)
 
 def shuffle_wait_message(i,table_name,slice_list):
+	global shuffle_games
 	shuffle_games = shuffle_games + 1
 	try_count[i] = 0
 	is_betting[i] = False
@@ -192,6 +193,7 @@ def shuffle_wait_message(i,table_name,slice_list):
 	debug_result(message_text,slice_list)
 
 def tie_wait_message(i,table_name,slice_list):
+	global tie_games
 	tie_games = tie_games + 1
 	try_count[i] = 0
 	is_betting[i] = False
@@ -206,6 +208,7 @@ def bet_message(table_name,bet_position,slice_list,try_count):
 	debug_result(message_text,slice_list)
 
 def win_message(table_name,slice_list):
+	global win_games
 	win_games = win_games + 1
 	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\n勝ち" 
 	message.send_all_message(message_text)
