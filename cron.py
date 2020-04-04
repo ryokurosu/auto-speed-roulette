@@ -72,6 +72,8 @@ use_tables = ["バカラ A","バカラ B","バカラ C","バカラスクイー�
 
 total_games = 0
 win_games = 0
+tie_games = 0
+shuffle_games = 0
 
 def login():
 	logger_set()
@@ -97,7 +99,6 @@ def go_to_live():
 	WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.ID, 'evolution_wrapper')))
 	browser.switch_to.frame(browser.find_element_by_id('evolution_wrapper'))
 	browser.implicitly_wait(1)
-
 
 def logger_set():
 	global logger
@@ -217,7 +218,7 @@ def lose_message(table_name,slice_list):
 	debug_result(message_text,slice_list)
 
 def debug_result(message_text,slice_list):
-	message_text = message_text + "（" + str(total_games) + "戦" + str(win_games) + "勝中）"
+	message_text = message_text + "\n（" + str(total_games) + "戦 " + str(win_games) + "勝 " + str(tie_games) + "タイ " + str(shuffle_games) + "シャッフル）"
 	logger.debug(message_text)
 	debug_message_text = message_text
 	for x in slice_list:
@@ -411,6 +412,7 @@ while(True):
 			if len(slice_list) == 0:
 				#dataが0個
 				if try_count[i] > 0:
+					shuffle_games = shuffle_games + 1
 					shuffle_wait_message(i,table_name,slice_list)
 				continue
 
@@ -465,8 +467,10 @@ while(True):
 
 				if now[slice_l - 1] == st:
 					if try_count[i] == 1:
+						tie_games = tie_games + 1
 						wait_message(i,table_name,slice_list)
 					elif try_count[i] == 2:
+						tie_games = tie_games + 1
 						tie_wait_message(i,table_name,slice_list)
 					continue
 
