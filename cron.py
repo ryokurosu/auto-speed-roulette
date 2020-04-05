@@ -100,6 +100,8 @@ def go_to_live():
 	browser.switch_to.frame(browser.find_element_by_id('evolution_wrapper'))
 	browser.implicitly_wait(1)
 
+#############################################
+
 def logger_set():
 	global logger
 	for h in logger.handlers:
@@ -167,8 +169,6 @@ def check_after_4_martin(data):
 
 	return True
 
-
-
 def notice_message(table_name,slice_list):
 	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\nべット準備してください。"
 	message.send_all_message(message_text)
@@ -232,6 +232,8 @@ def debug_result(message_text,slice_list):
 		debug_message_text = debug_message_text + "\n" + ' '.join(x)
 		pass
 	message.send_debug_message(debug_message_text)
+
+################################################################
 
 def start_browser():
 	global browser
@@ -416,6 +418,8 @@ while(True):
 			result_list = from_dataset_to_result(dataset)
 			slice_list = result_data_slice(result_list)
 
+
+			################################################################
 			if len(slice_list) == 0:
 				#dataが0個
 				if try_count[i] > 0:
@@ -546,6 +550,7 @@ while(True):
 			pass
 		finally:
 			pass
+		######################################################
 
 browser.quit()
 sys.exit()
