@@ -164,9 +164,16 @@ def check_before_row_4_martin(data,bet_type):
 def check_after_4_martin(data):
 	now = data[-1]
 	last = data[-2]
-	for x in range(0,len(now)):
-		if now[x] != st and now[x] != last[x]:
-			return False
+
+	if bet_type == type_normal:
+		for x in range(0,len(now)):
+			if now[x] != st and now[x] == last[x]:
+				return False
+
+	elif bet_type == type_mirror:
+		for x in range(0,len(now)):
+			if now[x] != st and now[x] != last[x]:
+				return False
 
 	return True
 
@@ -345,6 +352,7 @@ while(True):
 	clear_global_key()
 	loopcount = loopcount + 1
 	logger.debug("Loop Count : " + str(loopcount))
+	time.sleep(0.5)
 
 	signindivs = browser.find_elements_by_css_selector('#signin-mail')
 	if len(signindivs) > 0:
