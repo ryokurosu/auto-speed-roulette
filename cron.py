@@ -526,6 +526,7 @@ while(True):
 			elif is_betting[i] and try_count[i] >= 5 and try_count[i] <= 8:
 
 				if check_after_4_martin(slice_list):
+
 					if bet_type[i] == type_normal:
 						bet_position = normal_bet[last[slice_l]]
 					else:
@@ -546,8 +547,12 @@ while(True):
 
 
 			elif try_count[i] == 9:
-				if is_betting[i]:
+				if not check_after_4_martin(slice_list):
+					win_message(table_name,slice_list)
+
+				elif is_betting[i]:
 					lose_message(table_name,slice_list)
+					
 				is_betting[i] = False
 				bet_type[i] = type_normal
 				try_count[i] = 0
