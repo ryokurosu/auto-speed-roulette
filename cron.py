@@ -10,7 +10,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 import urllib.parse
 import time
 import random
-import datetime
+from datetime import datetime, timedelta, timezone
 import re
 import math
 import os
@@ -24,7 +24,8 @@ from logging import getLogger, StreamHandler, DEBUG, FileHandler, Formatter
 from selenium.common.exceptions import NoSuchElementException 
 
 
-nowdate = datetime.datetime.today().strftime("%Y%m%d_%H%M%S")
+JST = timezone(timedelta(hours=+9), 'JST')
+nowdate = datetime.now(JST).strftime("%Y%m%d_%H%M%S")
 logger = getLogger(__name__)
 handler = StreamHandler()
 handler = FileHandler(filename="./logs/" + nowdate + ".log", encoding="utf-8")
@@ -44,7 +45,7 @@ is_betting = []
 prev_count = []
 bet_type = []
 
-start_time = datetime.datetime.now()
+start_time = datetime.now(JST)
 start = time.time()
 loopcount = 0
 
@@ -106,7 +107,7 @@ def logger_set():
 	global logger
 	for h in logger.handlers:
 		logger.removeHandler(h)
-	nowdate = datetime.datetime.today().strftime("%Y%m%d_%H%M%S")
+	nowdate = datetime.now(JST).strftime("%Y%m%d_%H%M%S")
 	logger = getLogger(__name__)
 	handler = StreamHandler()
 	handler = FileHandler(filename="./logs/" + nowdate + ".log")
@@ -170,7 +171,7 @@ def check_after_4_martin(data):
 	return True
 
 def notice_message(table_name,slice_list):
-	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\nべット準備してください。"
+	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\nべット準備してください。"
 	message.send_all_message(message_text)
 	debug_result(message_text,slice_list)
 
@@ -178,7 +179,7 @@ def wait_message(i,table_name,slice_list):
 	try_count[i] = 0
 	is_betting[i] = False
 	bet_type[i] = type_normal
-	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\nベットせず待機してください。"
+	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\nベットせず待機してください。"
 	message.send_all_message(message_text)
 	debug_result(message_text,slice_list)
 
@@ -188,7 +189,7 @@ def shuffle_wait_message(i,table_name,slice_list):
 	try_count[i] = 0
 	is_betting[i] = False
 	bet_type[i] = type_normal
-	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\nシャッフルの為ベットせず待機してください。"
+	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\nシャッフルの為ベットせず待機してください。"
 	message.send_all_message(message_text)
 	debug_result(message_text,slice_list)
 
@@ -199,29 +200,29 @@ def tie_wait_message(i,table_name,slice_list):
 	# try_count[i] = 0
 	# is_betting[i] = False
 	# bet_type[i] = type_normal
-	# message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\nタイの為ベットせず待機次のテーブルや指示からBETの続きを再開してください。"
+	# message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\nタイの為ベットせず待機次のテーブルや指示からBETの続きを再開してください。"
 	# message.send_all_message(message_text)
 	# debug_result(message_text,slice_list)
 
 def bet_message(table_name,bet_position,slice_list,try_count):
-	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\n" + bet_position + " " + str(try_count)
+	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\n" + bet_position + " " + str(try_count)
 	message.send_all_message(message_text)
 	debug_result(message_text,slice_list)
 
 def win_message(table_name,slice_list):
 	global win_games
 	win_games = win_games + 1
-	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\n勝ち" 
+	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\n勝ち" 
 	message.send_all_message(message_text)
 	debug_result(message_text,slice_list)
 
 def game_1_wait_message(table_name,slice_list,try_count):
-	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\n1ゲームベットせず待機してください。 " + str(try_count)
+	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\n1ゲームベットせず待機してください。 " + str(try_count)
 	message.send_all_message(message_text)
 	debug_result(message_text,slice_list)
 
 def lose_message(table_name,slice_list):
-	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\n負け" 
+	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\n負け" 
 	debug_result(message_text,slice_list)
 
 def debug_result(message_text,slice_list):
@@ -240,8 +241,8 @@ def start_browser():
 	global start_time
 	if browser != "":
 		browser.quit()
-	message_text = "\nTYPE VERA Ver." + version + "\n起動しました。\n" + datetime.datetime.today().strftime("%Y/%m/%d %H:%M:%S")
-	start_time = datetime.datetime.now()
+	message_text = "\nTYPE VERA Ver." + version + "\n起動しました。\n" + datetime.now(JST).strftime("%Y/%m/%d %H:%M:%S")
+	start_time = datetime.now(JST)
 	message.send_debug_message(message_text)
 	base = os.path.dirname(os.path.abspath(__file__))
 	options = webdriver.ChromeOptions()
