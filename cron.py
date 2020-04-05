@@ -519,9 +519,9 @@ while(True):
 
 				if check_after_4_martin(slice_list):
 					if bet_type[i] == type_normal:
-						bet_position = normal_bet[now[0]]
+						bet_position = normal_bet[last[slice_l]]
 					else:
-						bet_position = reverse_bet[now[0]]
+						bet_position = reverse_bet[last[slice_l]]
 					try_count[i] = try_count[i] + 1
 					bet_message(table_name,bet_position,slice_list,try_count[i])
 					continue

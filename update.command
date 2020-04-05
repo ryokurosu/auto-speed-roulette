@@ -12,5 +12,4 @@ unzip chromedriver_mac64.zip
 rm chromedriver_mac64.zip
 source $PROG_DIR/env/bin/activate
 pip3 install -r requirements.txt
-rm -rf logs
 mkdir logs
