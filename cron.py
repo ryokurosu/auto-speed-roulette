@@ -68,7 +68,7 @@ reverse_bet[st] = st
 type_normal = 'normal'
 type_mirror = 'mirror'
 # use_tables = ["バカラ A","バカラ B","バカラ C","バカラスクイーズ","バカラコントロールスクイーズ"]
-use_tables = ["バカラ A","バカラ B","バカラ C","バカラスクイーズ","バカラコントロールスクイーズ"]
+use_tables = ["スピードバカラ A","スピードバカラ B","スピードバカラ C","バカラ A","バカラ B","バカラ C","バカラスクイーズ","バカラコントロールスクイーズ"]
 
 total_games = 0
 win_games = 0
@@ -195,12 +195,13 @@ def shuffle_wait_message(i,table_name,slice_list):
 def tie_wait_message(i,table_name,slice_list):
 	global tie_games
 	tie_games = tie_games + 1
-	try_count[i] = 0
-	is_betting[i] = False
-	bet_type[i] = type_normal
-	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\nタイの為ベットせず待機してください。"
-	message.send_all_message(message_text)
-	debug_result(message_text,slice_list)
+	# try_count[i] = try_count[i] + 1
+	# try_count[i] = 0
+	# is_betting[i] = False
+	# bet_type[i] = type_normal
+	# message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\nタイの為ベットせず待機次のテーブルや指示からBETの続きを再開してください。"
+	# message.send_all_message(message_text)
+	# debug_result(message_text,slice_list)
 
 def bet_message(table_name,bet_position,slice_list,try_count):
 	message_text = datetime.datetime.today().strftime("%H:%M ") + table_name + "\n" + bet_position + " " + str(try_count)
@@ -354,7 +355,7 @@ while(True):
 		logger_set()
 		continue
 
-	if is_betting.count(True) == 0 and (time.time() - start) > 1250:
+	if is_betting.count(True) == 0 and (time.time() - start) > 1200:
 		go_to_live()
 		WebDriverWait(browser, 60).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-game="baccarat"]')))
 		tables = browser.find_elements_by_css_selector('div[data-game="baccarat"]')
@@ -473,7 +474,7 @@ while(True):
 				if now[slice_l - 1] == st:
 					if try_count[i] == 1 or try_count[i] == 2:
 						tie_wait_message(i,table_name,slice_list)
-					continue
+					# continue
 
 				if bet_type[i] == type_normal and check_is_normal(slice_list):
 					bet_position = reverse_bet[last[slice_l]]
@@ -495,7 +496,10 @@ while(True):
 			elif is_betting[i] and try_count[i] == 4:
 
 				if check_before_row_4_martin(slice_list,bet_type[i]):
-					bet_position = reverse_bet[now[0]]
+					if bet_type[i] == type_normal:
+						bet_position = normal_bet[now[0]]
+					else:
+						bet_position = reverse_bet[now[0]]
 					try_count[i] = try_count[i] + 1
 					bet_message(table_name,bet_position,slice_list,try_count[i])
 					continue
@@ -509,7 +513,10 @@ while(True):
 			elif is_betting[i] and try_count[i] >= 5 and try_count[i] <= 8:
 
 				if check_after_4_martin(slice_list):
-					bet_position = reverse_bet[last[slice_l]]
+					if bet_type[i] == type_normal:
+						bet_position = normal_bet[now[0]]
+					else:
+						bet_position = reverse_bet[now[0]]
 					try_count[i] = try_count[i] + 1
 					bet_message(table_name,bet_position,slice_list,try_count[i])
 					continue
