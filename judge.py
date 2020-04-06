@@ -97,6 +97,11 @@ def add_try(i):
 	try_count[i] = try_count[i] + 1
 
 def debug_result(message_text,slice_list):
+	global total_games
+	global win_games
+	global tie_games
+	global shuffle_games
+	
 	message_text = message_text + "\n（" + str(total_games) + "戦 " + str(win_games) + "勝 " + str(tie_games) + "タイ " + str(shuffle_games) + "シャッフル）"
 	logger.debug(message_text)
 	debug_message_text = message_text
@@ -261,6 +266,7 @@ def exec(i,table_name,result_list,slice_list):
 	global is_betting
 	global try_count
 	global bet_type
+	global total_games
 
 	if len(slice_list) < 2:
 		#dataが0個
