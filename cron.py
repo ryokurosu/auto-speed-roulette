@@ -161,7 +161,7 @@ def check_before_row_4_martin(data,bet_type):
 
 	return False
 
-def check_after_4_martin(data):
+def check_after_4_martin(data,bet_type):
 	now = data[-1]
 	last = data[-2]
 
@@ -525,7 +525,7 @@ while(True):
 
 			elif is_betting[i] and try_count[i] >= 5 and try_count[i] <= 8:
 
-				if check_after_4_martin(slice_list):
+				if check_after_4_martin(slice_list,bet_type[i]):
 
 					if bet_type[i] == type_normal:
 						bet_position = normal_bet[last[slice_l]]
@@ -547,7 +547,7 @@ while(True):
 
 
 			elif try_count[i] == 9:
-				if not check_after_4_martin(slice_list):
+				if not check_after_4_martin(slice_list,bet_type[i]):
 					win_message(table_name,slice_list)
 
 				elif is_betting[i]:
