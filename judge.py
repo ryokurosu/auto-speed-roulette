@@ -112,7 +112,7 @@ def debug_result(message_text,slice_list):
 
 def is_skip(result_list,slice_list):
 
-	if len(slice_list) < 2:
+	if len(slice_list) < 3:
 		#2列以下である
 		return True
 
