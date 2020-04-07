@@ -36,7 +36,7 @@ st = 'T'
 sw = 'W'
 normal_bet = {sp:sp,sb:sb,st:sb,sw:sw}
 reverse_bet = {sp:sb,sb:sp,st:sb,sw:sw}
-message_bet = {sp:message_p,sb:message_bm,sw:message_w}
+message_bet = {sp:message_p,sb:message_b,sw:message_w}
 type_normal = 'normal'
 type_mirror = 'mirror'
 prev_count = []
@@ -81,6 +81,7 @@ def try_to_default(i):
 	global is_betting
 	global try_count
 	global bet_type
+	global bet_target
 	try_count[i] = 0
 	is_betting[i] = False
 	bet_type[i] = type_normal
@@ -152,7 +153,7 @@ def notice_check(data):
 		return type_mirror
 
 def win_or_false(try_target,bet_target):
-	for x in range(len(try_target)):
+	for x in range(len(bet_target)):
 		if try_target[x] == bet_target[x]:
 			return True
 
@@ -308,6 +309,15 @@ def exec(i,table_name,result_list,slice_list):
 	tmp_index = -1 * try_count[i]
 	try_target = result_list[tmp_index:]
 
+	if try_count[i] > 0:
+		tmp_index = -1 * try_count[i]
+		try_target = result_list[tmp_index:]
+	else:
+		try_target = tuple([])
+
+	print(try_target)
+	print(bet_target[i])
+
 	if not is_betting[i] and try_count[i] == 0 and slice_l == 1:
 		check = notice_check(slice_list)
 		if check == type_normal or check == type_mirror:
@@ -336,18 +346,18 @@ def exec(i,table_name,result_list,slice_list):
 
 		if win_or_false(try_target,bet_target[i]):
 			win_message(i,table_name,slice_list)
-
-		if now[slice_l - 1] == st:
-			if try_count[i] == 1 or try_count[i] == 2:
-				tie_wait_message(i,table_name,slice_list)
+		else:
+			# if now[slice_l - 1] == st:
+			# 	if try_count[i] == 1 or try_count[i] == 2:
+			# 		tie_wait_message(i,table_name,slice_list)
 			# continue
 
-		if bet_type[i] == type_normal:
-			target = last[slice_l]
-		elif bet_type[i] == type_mirror:
-			target = last[slice_l - 2]
+			if bet_type[i] == type_normal:
+				target = last[slice_l]
+			elif bet_type[i] == type_mirror:
+				target = last[slice_l - 2]
 
-		bet_message(i,table_name,target,slice_list)
+			bet_message(i,table_name,target,slice_list)
 		
 
 	elif is_betting[i] and try_count[i] == 4:
@@ -356,8 +366,6 @@ def exec(i,table_name,result_list,slice_list):
 			win_message(i,table_name,slice_list)
 		else:
 			bet_message(i,table_name,now[0],slice_list)
-		
-		return 0;
 
 	elif is_betting[i] and try_count[i] >= 5 and try_count[i] <= 8:
 
@@ -369,7 +377,7 @@ def exec(i,table_name,result_list,slice_list):
 		else:
 			bet_message(i,table_name,last[slice_l],slice_list)
 
-		return 0;
+
 
 	elif try_count[i] == 9:
 		if win_or_false(try_target,bet_target[i]):
