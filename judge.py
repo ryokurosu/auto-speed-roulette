@@ -279,7 +279,7 @@ def file_print(slice_list):
 		tmp_tuple = tmp_tuple + l
 
 	with open('logic_test.txt', 'a') as f:
-    	print(tmp_tuple, file=f)
+		print(tmp_tuple, file=f)
 
 def check_prev_count(i,tmp_tuple):
 	global prev_count
