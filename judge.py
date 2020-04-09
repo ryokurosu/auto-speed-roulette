@@ -229,16 +229,20 @@ def bet_message(i,table_name,target,slice_list):
 			bet_position = normal_bet[target]
 
 	elif try_count[i] >= 4:
-		rb = reverse_bet[target]
-		tmp_tuple = slice_list[-3] + slice_list[-2] + slice_list[-1]
-		tmp_tuple = tmp_tuple[-12:]
-
-		if tmp_tuple.count(st) <= 2 and tmp_tuple.count(rb) == 0:
+		if try_count[i] % 2 == 0:
 			bet_position = reverse_bet[target]
-		elif bet_type[i] == type_normal:
+		else:
 			bet_position = normal_bet[target]
-		elif bet_type[i] == type_mirror or bet_type[i] == type_normal_mirror:
-			bet_position = reverse_bet[target]
+		# rb = reverse_bet[target]
+		# tmp_tuple = slice_list[-3] + slice_list[-2] + slice_list[-1]
+		# tmp_tuple = tmp_tuple[-12:]
+
+		# if tmp_tuple.count(st) <= 2 and tmp_tuple.count(rb) == 0:
+		# 	bet_position = reverse_bet[target]
+		# elif bet_type[i] == type_normal:
+		# 	bet_position = normal_bet[target]
+		# elif bet_type[i] == type_mirror or bet_type[i] == type_normal_mirror:
+		# 	bet_position = reverse_bet[target]
 	
 	add_try(i,bet_position)
 	message_bet_position = message_bet[bet_position]
@@ -254,6 +258,7 @@ def win_message(i,table_name,slice_list):
 	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\n勝ち" 
 	message.send_all_message(message_text + "\n（" + str(total_games) + "戦" + str(total_games) + "勝）")
 	debug_result(message_text,slice_list)
+	file_print(slice_list)
 
 def game_1_wait_message(i,table_name,slice_list):
 	global try_count
@@ -266,6 +271,15 @@ def lose_message(i,table_name,slice_list):
 	try_to_default(i)
 	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\n負け" 
 	debug_result(message_text,slice_list)
+	file_print(slice_list)
+
+def file_print(slice_list):
+	tmp_tuple = tuple([])
+	for l in slice_list:
+		tmp_tuple = tmp_tuple + l
+
+	with open('logic_test.txt', 'a') as f:
+    	print(tmp_tuple, file=f)
 
 def check_prev_count(i,tmp_tuple):
 	global prev_count
