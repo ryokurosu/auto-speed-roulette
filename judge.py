@@ -39,6 +39,7 @@ reverse_bet = {sp:sb,sb:sp,st:sb,sw:sw}
 message_bet = {sp:message_p,sb:message_b,sw:message_w}
 type_normal = 'normal'
 type_mirror = 'mirror'
+type_normal_mirror = 'normal_mirror'
 prev_count = []
 bet_type = []
 is_betting = []
@@ -151,6 +152,8 @@ def notice_check(data):
 		return type_normal
 	elif now[0] == last[-1]:
 		return type_mirror
+	elif now[0] == last[1]:
+		return type_normal_mirror
 
 def win_or_false(try_target,bet_target):
 	for x in range(len(bet_target)):
@@ -175,34 +178,23 @@ def check_is_mirror(data,try_target,bet_target):
 
 	return not win_or_false(try_target,bet_target)
 
-def check_before_row_4_martin(data,bet_type,try_target,bet_target):
-	return win_or_false(try_target,bet_target)
-
-def check_after_4_martin(data,try_target,bet_target):
+def check_is_normal_mirror(data,try_target,bet_target):
 	now = data[-1]
 	last = data[-2]
-
-	if bet_type == type_normal:
-		for x in range(0,len(now)):
-			if now[x] != st and now[x] == last[x]:
-				return False
-
-	elif bet_type == type_mirror:
-		for x in range(0,len(now)):
-			if now[x] != st and now[x] != last[x]:
-				return False
+	if now[0] != last[1] or now[1] != last[0]:
+		return False
 
 	return not win_or_false(try_target,bet_target)
 
 def notice_message(i,normal_or_mirror,table_name,slice_list):
 	try_chance(i,normal_or_mirror)
-	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\nべット準備してください。"
+	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\nべット準備"
 	message.send_all_message(message_text)
 	debug_result(message_text,slice_list)
 
 def wait_message(i,table_name,slice_list):
 	try_to_default(i)
-	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\nベットせず待機してください。"
+	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\nベットせず待機"
 	message.send_all_message(message_text)
 	debug_result(message_text,slice_list)
 
@@ -210,20 +202,17 @@ def shuffle_wait_message(i,table_name,slice_list):
 	global shuffle_games
 	shuffle_games = shuffle_games + 1
 	try_to_default(i)
-	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\nシャッフルの為ベットせず待機してください。"
+	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\nベットせず待機"
 	message.send_all_message(message_text)
 	debug_result(message_text,slice_list)
 
 def tie_wait_message(i,table_name,slice_list):
 	global tie_games
 	tie_games = tie_games + 1
-	# try_count[i] = try_count[i] + 1
-	# try_count[i] = 0
-	# is_betting[i] = False
-	# bet_type[i] = type_normal
-	# message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\nタイの為ベットせず待機次のテーブルや指示からBETの続きを再開してください。"
-	# message.send_all_message(message_text)
-	# debug_result(message_text,slice_list)
+	try_to_default(i)
+	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\nベットせず待機"
+	message.send_all_message(message_text)
+	debug_result(message_text,slice_list)
 
 def bet_message(i,table_name,target,slice_list):
 	global message_bet
@@ -236,12 +225,19 @@ def bet_message(i,table_name,target,slice_list):
 	if try_count[i] < 4:
 		if bet_type[i] == type_normal:
 			bet_position = reverse_bet[target]
-		else:
+		elif bet_type[i] == type_mirror or bet_type[i] == type_normal_mirror:
 			bet_position = normal_bet[target]
+
 	elif try_count[i] >= 4:
-		if bet_type[i] == type_normal:
+		rb = reverse_bet[target]
+		tmp_tuple = slice_list[-3] + slice_list[-2] + slice_list[-1]
+		tmp_tuple = tmp_tuple[-12:]
+
+		if tmp_tuple.count(st) <= 2 and tmp_tuple.count(rb) == 0:
+			bet_position = reverse_bet[target]
+		elif bet_type[i] == type_normal:
 			bet_position = normal_bet[target]
-		else:
+		elif bet_type[i] == type_mirror or bet_type[i] == type_normal_mirror:
 			bet_position = reverse_bet[target]
 	
 	add_try(i,bet_position)
@@ -251,17 +247,18 @@ def bet_message(i,table_name,target,slice_list):
 	debug_result(message_text,slice_list)
 
 def win_message(i,table_name,slice_list):
+	global total_games
 	global win_games
 	win_games = win_games + 1
 	try_to_default(i)
 	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\n勝ち" 
-	message.send_all_message(message_text)
+	message.send_all_message(message_text + "\n（" + str(total_games) + "戦" + str(total_games) + "勝）")
 	debug_result(message_text,slice_list)
 
 def game_1_wait_message(i,table_name,slice_list):
 	global try_count
 	add_try(i,'W')
-	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\n1ゲームベットせず待機してください。 " + str(try_count[i])
+	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\nベットせず待機 " + str(try_count[i])
 	message.send_all_message(message_text)
 	debug_result(message_text,slice_list)
 
@@ -320,7 +317,7 @@ def exec(i,table_name,result_list,slice_list):
 
 	if not is_betting[i] and try_count[i] == 0 and slice_l == 1:
 		check = notice_check(slice_list)
-		if check == type_normal or check == type_mirror:
+		if check == type_normal or check == type_mirror or check == type_normal_mirror:
 			notice_message(i,check,table_name,slice_list)
 
 	elif is_betting[i] and try_count[i] == 0:
@@ -335,9 +332,19 @@ def exec(i,table_name,result_list,slice_list):
 			bet_type[i] = type_mirror
 
 
-		if bet_type[i] == type_mirror and check_is_mirror(slice_list,try_target,bet_target[i]):
-			bet_message(i,table_name,last[slice_l - 2],slice_list)
-			return 0;
+		if bet_type[i] == type_mirror:
+			if check_is_mirror(slice_list,try_target,bet_target[i]):
+				bet_message(i,table_name,last[slice_l - 2],slice_list)
+				return 0;
+
+		elif now[0] == last[1]:
+			#mirror ではなく normal_mirrorの可能性
+			bet_type[i] = type_normal_mirror
+
+		if bet_type[i] == type_normal_mirror:
+			if check_is_normal_mirror(slice_list,try_target,bet_target[i]):
+				bet_message(i,table_name,last[slice_l],slice_list)
+				return 0;
 
 		wait_message(i,table_name,slice_list)
 		return 0;
@@ -347,12 +354,11 @@ def exec(i,table_name,result_list,slice_list):
 		if win_or_false(try_target,bet_target[i]):
 			win_message(i,table_name,slice_list)
 		else:
-			# if now[slice_l - 1] == st:
-			# 	if try_count[i] == 1 or try_count[i] == 2:
-			# 		tie_wait_message(i,table_name,slice_list)
-			# continue
+			if now[-1] == st and ( try_count[i] == 1 or try_count[i] == 2 ):
+				tie_wait_message(i,table_name,slice_list)
+				return 0
 
-			if bet_type[i] == type_normal:
+			if bet_type[i] == type_normal or bet_type[i] == type_normal_mirror:
 				target = last[slice_l]
 			elif bet_type[i] == type_mirror:
 				target = last[slice_l - 2]
