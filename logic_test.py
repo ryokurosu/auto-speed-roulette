@@ -39,7 +39,7 @@ while line:
 		result_list = l[0:(x+1)]
 		slice_list = cron.result_data_slice(result_list)
 		if len(slice_list) >= 3:
-			judge.exec(0,"テスターテーブル",result_list,slice_list)
+			judge.run(0,"テスターテーブル",result_list,slice_list)
 	
 	line = f.readline()
 f.close()

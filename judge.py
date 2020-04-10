@@ -332,7 +332,7 @@ def test_result():
 	print('tie_games : ' + str(tie_games))
 	print('shuffle_games : ' + str(shuffle_games))
 
-def exec(i,table_name,result_list,slice_list):
+def run(i,table_name,result_list,slice_list):
 	global is_betting
 	global try_count
 	global bet_type

@@ -217,7 +217,7 @@ if __name__ == "__main__":
 
 				result_list = from_dataset_to_result(dataset)
 				slice_list = result_data_slice(result_list)
-				judge.exec(i,table_name,result_list,slice_list)
+				judge.run(i,table_name,result_list,slice_list)
 				# print_varsize()
 				clear_global_key()
 
