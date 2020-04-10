@@ -44,9 +44,11 @@ prev_count = []
 bet_type = []
 is_betting = []
 bet_target = []
+debug_tries = [0] * 9
 
 total_games = 0
 win_games = 0
+lose_games = 0
 tie_games = 0
 shuffle_games = 0
 
@@ -97,6 +99,8 @@ def try_chance(i,normal_or_mirror):
 def add_try(i,bet_position):
 	global try_count
 	global bet_target
+	global debug_tries
+	debug_tries[try_count[i]] = debug_tries[try_count[i]] + 1
 	try_count[i] = try_count[i] + 1
 	bet_target[i] = bet_target[i] + tuple([bet_position])
 
@@ -134,14 +138,16 @@ def is_skip(result_list,slice_list):
 	if result_list.count(st) - now.count(st) >= 4:
 		#タイが4つ以上
 		return True
+
+	return False
 	
-	check = True
-	for x in range(1,5):
-		if last[x] != st and last[x] == last[x - 1] and last[x] == last[x + 1]:
-			check = False
-		else:
-			pass
-	return check
+	# check = True
+	# for x in range(1,5):
+	# 	if last[x] != st and last[x] == last[x - 1] and last[x] == last[x + 1]:
+	# 		check = False
+	# 	else:
+	# 		pass
+	# return check
 
 def notice_check(data):
 	now = data[-1]
@@ -229,16 +235,27 @@ def bet_message(i,table_name,target,slice_list):
 			bet_position = normal_bet[target]
 
 	elif try_count[i] >= 4:
-		if try_count[i] % 2 == 0:
+
+		rb = reverse_bet[target]
+		if len(slice_list[-1]) == 6:
+			tmp_tuple = slice_list[-2] + slice_list[-1]
+		else:
+			tmp_tuple = slice_list[-3] + slice_list[-2]
+
+		if tmp_tuple.count(st) <= 2 and tmp_tuple.count(rb) == 0:
+			bet_position = reverse_bet[target]
+		elif bet_type[i] == type_normal:
+			bet_position = reverse_bet[target]
+		elif try_count[i] % 2 == 0:
 			bet_position = reverse_bet[target]
 		else:
 			bet_position = normal_bet[target]
-		# rb = reverse_bet[target]
-		# tmp_tuple = slice_list[-3] + slice_list[-2] + slice_list[-1]
-		# tmp_tuple = tmp_tuple[-12:]
 
-		# if tmp_tuple.count(st) <= 2 and tmp_tuple.count(rb) == 0:
+		# if try_count[i] % 2 == 0:
 		# 	bet_position = reverse_bet[target]
+		# else:
+		# 	bet_position = normal_bet[target]
+		
 		# elif bet_type[i] == type_normal:
 		# 	bet_position = normal_bet[target]
 		# elif bet_type[i] == type_mirror or bet_type[i] == type_normal_mirror:
@@ -258,7 +275,7 @@ def win_message(i,table_name,slice_list):
 	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\n勝ち" 
 	message.send_all_message(message_text + "\n（" + str(total_games) + "戦" + str(total_games) + "勝）")
 	debug_result(message_text,slice_list)
-	file_print(slice_list)
+	file_print(table_name,slice_list)
 
 def game_1_wait_message(i,table_name,slice_list):
 	global try_count
@@ -268,18 +285,24 @@ def game_1_wait_message(i,table_name,slice_list):
 	debug_result(message_text,slice_list)
 
 def lose_message(i,table_name,slice_list):
+	global lose_games
+	lose_games = lose_games + 1
 	try_to_default(i)
 	message_text = datetime.now(JST).strftime("%H:%M ") + table_name + "\n負け" 
 	debug_result(message_text,slice_list)
-	file_print(slice_list)
+	file_print(table_name,slice_list)
 
-def file_print(slice_list):
+def file_print(table_name,slice_list):
 	tmp_tuple = tuple([])
 	for l in slice_list:
 		tmp_tuple = tmp_tuple + l
 
-	with open('logic_test.txt', 'a') as f:
-		print(tmp_tuple, file=f)
+	for x in slice_list:
+		print(' '.join(x))
+
+	if message.is_production:
+		with open('logic_test.txt', 'a') as f:
+			print(tmp_tuple, file=f)
 
 def check_prev_count(i,tmp_tuple):
 	global prev_count
@@ -287,6 +310,27 @@ def check_prev_count(i,tmp_tuple):
 		return True
 	prev_count[i] = tmp_tuple
 	return False
+
+def test_result():
+	global debug_tries
+	global total_games
+	global win_games
+	global tie_games
+	global lose_games
+	global shuffle_games
+
+	for x in range(len(debug_tries) - 1, -1, -1):
+		for k in range(x - 1 , -1, -1):
+			debug_tries[k] = debug_tries[k] - debug_tries[x]
+
+	print("------テスト結果------")
+	for i in range(len(debug_tries)):
+		print( "マーチン" + str(i) + " : " + str(debug_tries[i]))
+	print('total_games : ' + str(total_games))
+	print('win_games : ' + str(win_games))
+	print('lose_games : ' + str(lose_games))
+	print('tie_games : ' + str(tie_games))
+	print('shuffle_games : ' + str(shuffle_games))
 
 def exec(i,table_name,result_list,slice_list):
 	global is_betting
@@ -312,20 +356,15 @@ def exec(i,table_name,result_list,slice_list):
 			
 	last = slice_list[-2]
 
-	print(table_name)
-	print(last)
-	print(now)
-
 	slice_l = len(now)
 	tmp_index = -1 * try_count[i]
-	try_target = result_list[tmp_index:]
 
+	try_target = tuple([])
 	if try_count[i] > 0:
 		tmp_index = -1 * try_count[i]
 		try_target = result_list[tmp_index:]
-	else:
-		try_target = tuple([])
 
+	print(table_name + " マーチン" + str(try_count[i]))
 	print(try_target)
 	print(bet_target[i])
 

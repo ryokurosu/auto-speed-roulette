@@ -6,3 +6,4 @@ logs/*
 env/*
 wenv/*
 logic_test.txt
+output.txt

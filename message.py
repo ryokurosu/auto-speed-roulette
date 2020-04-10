@@ -48,6 +48,12 @@ if os.environ.get("APP_ENV"):
 else:
     app_env = "本番用"
 
+is_production = True
+
+def set_debug():
+    global is_production
+    is_production = False
+
 def beep(freq, dur=100):
     if os.name == 'nt':
         # Windowsの場合は、winsoundというPython標準ライブラリを使います.
@@ -71,6 +77,8 @@ def send_group_message(group_id,message_text):
     
 
 def send_all_message(message_text):
+    if not is_production:
+        return 0
     beep(2000,500)
     print('*******************')
     print(message_text)
@@ -110,6 +118,9 @@ def send_all_message(message_text):
     
 
 def send_debug_message(message_text):
+    if not is_production:
+        return 0
+        
     try:
         bot.send_message(chat_id=debug_chat_id, text=message_text)
     except Exception as e:

@@ -156,77 +156,78 @@ def print_varsize():
         elif hasattr(v, '__len__') and not k.startswith('_') and not isinstance(v,types.ModuleType):
             print("{}{: >15}{}{: >10}{}".format('|',k,'|',str(len(v)),'|'))
 
-start_browser()
-print(use_tables)
-initialize()
+if __name__ == "__main__":
+	start_browser()
+	print(use_tables)
+	initialize()
 
-while(True):
-	loopcount = loopcount + 1
-	judge.logger.debug("Loop Count : " + str(loopcount))
-	time.sleep(0.8)
+	while(True):
+		loopcount = loopcount + 1
+		judge.logger.debug("Loop Count : " + str(loopcount))
+		time.sleep(0.8)
 
-	signindivs = browser.find_elements_by_css_selector('#signin-mail')
-	if len(signindivs) > 0:
-		login()
-		initialize()
-		continue
+		signindivs = browser.find_elements_by_css_selector('#signin-mail')
+		if len(signindivs) > 0:
+			login()
+			initialize()
+			continue
 
-	if judge.is_betting.count(True) == 0 and (time.time() - start) > 1200:
-		go_to_live()
-		initialize()
-		start = time.time()
-		continue
+		if judge.is_betting.count(True) == 0 and (time.time() - start) > 1200:
+			go_to_live()
+			initialize()
+			start = time.time()
+			continue
 
-	tables = browser.find_elements_by_css_selector('div[data-game="baccarat"]')
+		tables = browser.find_elements_by_css_selector('div[data-game="baccarat"]')
 
-	for i in range(len(tables)):
-		try:
-			table = tables[i]
-			tmp = table.text.split("\n")
-			table_name = tmp[-3]
-			if not table_name or not check_table_name(table_name):
-				continue
+		for i in range(len(tables)):
+			try:
+				table = tables[i]
+				tmp = table.text.split("\n")
+				table_name = tmp[-3]
+				if not table_name or not check_table_name(table_name):
+					continue
 
-			road_item_colors = table.find_elements_by_css_selector('g[data-type="roadItemColor"]')
-			tmp_tuple = tuple([len(road_item_colors)]) + tuple(tmp[1:-3])
+				road_item_colors = table.find_elements_by_css_selector('g[data-type="roadItemColor"]')
+				tmp_tuple = tuple([len(road_item_colors)]) + tuple(tmp[1:-3])
 
-			if judge.check_prev_count(i,tmp_tuple):
-				continue
+				if judge.check_prev_count(i,tmp_tuple):
+					continue
 
-			svgs = table.find_elements_by_css_selector('svg[data-role="Big-road"] svg[data-type="coordinates"]')
-			dataset = copy.deepcopy(none_list)
+				svgs = table.find_elements_by_css_selector('svg[data-role="Big-road"] svg[data-type="coordinates"]')
+				dataset = copy.deepcopy(none_list)
 
-			for svg in svgs:
-				additem = ()
-				child_svg = svg.find_element_by_css_selector('svg[data-type="roadItem"]')
-				name = child_svg.get_attribute('name')
-				spl = name.split(' ')
-				# additem.append(spl[0])
-				v = spl[0][0]
-				if v == sp or v == sb or v == st:
-					additem = additem + tuple([v])
+				for svg in svgs:
+					additem = ()
+					child_svg = svg.find_element_by_css_selector('svg[data-type="roadItem"]')
+					name = child_svg.get_attribute('name')
+					spl = name.split(' ')
+					# additem.append(spl[0])
+					v = spl[0][0]
+					if v == sp or v == sb or v == st:
+						additem = additem + tuple([v])
 
-				if len(spl) > 1 and judge.st in spl[1]:
-					if child_svg.text == '':
-						additem = additem + tuple([judge.st])
-					else:
-						additem = additem + tuple([judge.st] * int(child_svg.text))
+					if len(spl) > 1 and judge.st in spl[1]:
+						if child_svg.text == '':
+							additem = additem + tuple([judge.st])
+						else:
+							additem = additem + tuple([judge.st] * int(child_svg.text))
 
-				dataset[int(svg.get_attribute('data-x'))][int(svg.get_attribute('data-y'))] = additem
+					dataset[int(svg.get_attribute('data-x'))][int(svg.get_attribute('data-y'))] = additem
 
-			result_list = from_dataset_to_result(dataset)
-			slice_list = result_data_slice(result_list)
-			judge.exec(i,table_name,result_list,slice_list)
-			# print_varsize()
-			clear_global_key()
+				result_list = from_dataset_to_result(dataset)
+				slice_list = result_data_slice(result_list)
+				judge.exec(i,table_name,result_list,slice_list)
+				# print_varsize()
+				clear_global_key()
 
-		except Exception as e:
-			print(traceback.format_exc())
-			pass
-		else:
-			pass
-		finally:
-			pass
+			except Exception as e:
+				print(traceback.format_exc())
+				pass
+			else:
+				pass
+			finally:
+				pass
 
-browser.quit()
-sys.exit()
+	browser.quit()
+	sys.exit()
