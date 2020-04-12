@@ -25,61 +25,111 @@ from selenium.common.exceptions import NoSuchElementException
 import copy
 
 JST = timezone(timedelta(hours=+9), 'JST')
-version = "1.1.0"
-array_size = 6
-dataset_x = 40
-dataset_y = 6
+version = "1.1.1"
 
 browser = ""
-tables = []
 
 start_time = datetime.now(JST)
 start = time.time()
+last_bet = time.time()
+print_time = time.time()
 loopcount = 0
+target_table = "スピード オートルーレット"
 
 username = message.username
 password = message.password
 startURL = "https://www.verajohn.com/ja/livecasino"
-liveURL = "https://www.verajohn.com/ja/game/baccarat-lobby-paris"
-
-sp = judge.sp
-sb = judge.sb
-st = judge.st
-
-none_list = [[None] * dataset_y for k in range(dataset_x)]
-
-# use_tables = ["バカラ A","バカラ B","バカラ C","バカラスクイーズ","バカラコントロールスクイーズ"]
-use_tables = ["スピードバカラ A","スピードバカラ B","スピードバカラ C","バカラ A","バカラ B","バカラ C","バカラスクイーズ","バカラコントロールスクイーズ"]
-
+liveURL = "https://www.verajohn.com/ja/game/roulette-lobby-paris"
+number_logs = tuple([])
+prev_tuple = tuple([])
+now_betnumber = 10000
+is_betting = False
+bet_count = 0
+win_count = 0
+lose_count = 0
 
 def login():
 	browser.get(startURL)
 	time.sleep(1)
 	browser.implicitly_wait(10)
-	WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.ID, 'signin-mail'))).send_keys(username)
-	WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.ID, 'signin-pass'))).send_keys(password)
-	time.sleep(1)
-	browser.find_element_by_id('edit-submit-signin--2').click()
+	try:
+		WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.ID, 'signin-mail'))).send_keys(username)
+		WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.ID, 'signin-pass'))).send_keys(password)
+		time.sleep(1)
+		browser.find_element_by_id('edit-submit-signin--2').click()
+	except Exception as e:
+		pass
+	else:
+		pass
+	finally:
+		pass
 	WebDriverWait(browser, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.link.link--alone.js-logout')))
 	go_to_live()
 
 def go_to_live():
+	global browser
+	global target_table
 	browser.get(liveURL)
-	time.sleep(15)
+	browser.switch_to.default_content()
+	print('go live URL')
 	WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.gamelayerGameHolder-holder.lazyFrame.loaded')))
 	browser.switch_to.frame(browser.find_element_by_css_selector('.gamelayerGameHolder-holder.lazyFrame.loaded'))
+	print('change frame to [.gamelayerGameHolder-holder.lazyFrame.loaded]')
+	time.sleep(3)
 	WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.ID, 'game-wrapper')))
 	browser.switch_to.frame(browser.find_element_by_id('game-wrapper'))
+	print('change frame to [#game-wrapper]')
+	time.sleep(3)
 	WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.ID, 'evolution_wrapper')))
 	browser.switch_to.frame(browser.find_element_by_id('evolution_wrapper'))
+	print('change frame to [#evolution_wrapper]')
+	time.sleep(5)
+	print('jump to table')
+	jump = False
+	while(not jump):
+		WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-role="table-view"]')))
+		tables = browser.find_elements_by_css_selector('div[data-role="table-view"]')
+		for t in tables:
+			spl = t.text.split("\n")
+			if target_table in spl:
+				actions = ActionChains(browser)
+				actions.move_to_element(t)
+				actions.click()
+				actions.perform()
+				jump = True
+				break;
 	browser.implicitly_wait(1)
+
+def click_continue():
+	global browser
+	global start
+	browser.switch_to.default_content()
+	elems = browser.find_elements_by_css_selector('a[data-method="continue"]')
+	if len(elems) > 0:
+		print('push continue ...')
+		for e in elems:
+			actions = ActionChains(browser)
+			actions.move_to_element(e)
+			actions.click()
+			actions.perform()
+
+		start = time.time()
+	WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.gamelayerGameHolder-holder.lazyFrame.loaded')))
+	browser.switch_to.frame(browser.find_element_by_css_selector('.gamelayerGameHolder-holder.lazyFrame.loaded'))
+	print('change frame to [.gamelayerGameHolder-holder.lazyFrame.loaded]')
+	WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.ID, 'game-wrapper')))
+	browser.switch_to.frame(browser.find_element_by_id('game-wrapper'))
+	print('change frame to [#game-wrapper]')
+	WebDriverWait(browser, 30).until(EC.presence_of_element_located((By.ID, 'evolution_wrapper')))
+	browser.switch_to.frame(browser.find_element_by_id('evolution_wrapper'))
+	print('change frame to [#evolution_wrapper]')
 
 def start_browser():
 	global browser
 	global start_time
 	if browser != "":
 		browser.quit()
-	message_text = "\nTYPE VERA Ver." + version + "\n起動しました。\n" + datetime.now(JST).strftime("%Y/%m/%d %H:%M:%S")
+	message_text = "\nTYPE ROULETTE Ver." + version + "\n起動しました。\n" + datetime.now(JST).strftime("%Y/%m/%d %H:%M:%S")
 	start_time = datetime.now(JST)
 	message.send_debug_message(message_text)
 	base = os.path.dirname(os.path.abspath(__file__))
@@ -102,49 +152,29 @@ def clear_global_key():
 	global svgs
 	svgs = ""
 
-def check_table_name(table_name):
-	return table_name in use_tables
-
-def from_dataset_to_result(dataset):
-	x = 0
-	y = 0
-	now_column = 0
-	result = ()
-	while(True):
-		# get data (list)
-		d = dataset[x][y]
-		if d == None:
-			break
-
-		value = d[0]
-		# result.extend(d)
-		result = result + d
-
-		if y <= (dataset_y - 2) and dataset[x][y + 1] != None and value == dataset[x][y + 1][0]:
-			y = y + 1
-		elif x <= (dataset_x - 2) and dataset[x + 1][y] != None and value == dataset[x + 1][y][0]:
-			x = x + 1
-		else:
-			now_column = now_column + 1
-			x = now_column
-			y = 0
-
-	return result 
-
-def result_data_slice(result_list):
-	slice_list = []
-	columns_count = math.ceil(len(result_list) / array_size)
-	for x in range(0,columns_count):
-		start = x * array_size
-		end = ( x + 1 ) * array_size
-		slice_list.append(result_list[start:end])
-		pass
-	return slice_list
-
 def initialize():
-	WebDriverWait(browser, 60).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-game="baccarat"]')))
-	tables = browser.find_elements_by_css_selector('div[data-game="baccarat"]')
-	judge.set_default_val(len(tables))
+	global number_logs
+	global prev_tuple
+	global now_betnumber
+	global is_betting
+	global bet_count
+	global start
+	global last_bet
+	number_logs = tuple([])
+	prev_tuple = tuple([])
+	now_betnumber = 10000
+	is_betting = False
+	bet_count = 0
+	start = time.time()
+	last_bet = time.time()
+
+def set_default_value():
+	global now_betnumber
+	global is_betting
+	global bet_count
+	now_betnumber = 10000
+	is_betting = False
+	bet_count = 0
 
 def print_varsize():
     import types
@@ -156,78 +186,197 @@ def print_varsize():
         elif hasattr(v, '__len__') and not k.startswith('_') and not isinstance(v,types.ModuleType):
             print("{}{: >15}{}{: >10}{}".format('|',k,'|',str(len(v)),'|'))
 
+def click_number(number,click_count = 1):
+	global browser
+	time.sleep(1.7)
+	path = browser.find_element_by_css_selector('path[data-bet-spot-id="' + str(number) + '"]')
+	actions = ActionChains(browser)
+	actions.move_to_element(path)
+	actions.click()
+	# loop = math.ceil(click_count / 10)
+	# for x in range(0,loop):
+	# 	actions.perform();
+	# 	time.sleep(0.2)
+	if click_count > 20:
+		actions.perform();
+		time.sleep(0.2)
+		actions.perform();
+		time.sleep(0.2)
+
+	if click_count > 10:
+		actions.perform();
+		time.sleep(0.2)
+
+	actions.perform();
+
+def add_number_logs(current_tuple):
+	global number_logs
+	number_logs = tuple([current_tuple[0]]) + number_logs
+
+def file_print(result_tuple):
+	if message.is_production:
+		with open('logic_test.txt', 'a') as f:
+			print(result_tuple, file=f)
+
 if __name__ == "__main__":
 	start_browser()
-	print(use_tables)
 	initialize()
 
 	while(True):
 		loopcount = loopcount + 1
 		judge.logger.debug("Loop Count : " + str(loopcount))
-		time.sleep(0.8)
+		time.sleep(1)
 
-		signindivs = browser.find_elements_by_css_selector('#signin-mail')
-		if len(signindivs) > 0:
+		try:
+			tables = browser.find_elements_by_css_selector('div[data-role="table-view"]')
+			if len(tables) > 0:
+				for t in tables:
+					spl = t.text.split("\n")
+					if target_table in spl:
+						actions = ActionChains(browser)
+						actions.move_to_element(t)
+						actions.click().perform();
+						continue;
+		except Exception as e:
+			print(traceback.format_exc())
+			pass
+		else:
+			pass
+		finally:
+			pass
+
+		try:
+			if loopcount % 300 == 0:
+				click_continue()
+				
+		except Exception as e:
+			pass
+		else:
+			pass
+		finally:
+			pass
+
+
+		try:
+			signindivs = browser.find_elements_by_css_selector('#signin-mail')
+			if len(signindivs) > 0:
+				login()
+				initialize()
+				continue
+		except Exception as e:
+			pass
+		else:
+			pass
+		finally:
+			pass
+
+		try:
+			if is_betting == False and (time.time() - last_bet) > 1800:
+				print("Refresh 5s stop ...")
+				time.sleep(5)
+				login()
+				initialize()
+				continue
+		except Exception as e:
+			pass
+		else:
+			pass
+		finally:
+			pass
+
+		try:
+			WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-role="radial-chip"]')))
+		except Exception as e:
+			print("Refresh 5s stop ...")
+			time.sleep(5)
 			login()
 			initialize()
 			continue
+		else:
+			pass
+		finally:
+			pass
 
-		if judge.is_betting.count(True) == 0 and (time.time() - start) > 1200:
-			go_to_live()
-			initialize()
-			start = time.time()
-			continue
 
-		tables = browser.find_elements_by_css_selector('div[data-game="baccarat"]')
 
-		for i in range(len(tables)):
-			try:
-				table = tables[i]
-				tmp = table.text.split("\n")
-				table_name = tmp[-3]
-				if not table_name or not check_table_name(table_name):
-					continue
+		try:
+			# JSで実行すればいける
+			browser.execute_script("document.querySelectorAll('div[data-role=\"radial-chip\"]')[0].click();")
 
-				road_item_colors = table.find_elements_by_css_selector('g[data-type="roadItemColor"]')
-				tmp_tuple = tuple([len(road_item_colors)]) + tuple(tmp[1:-3])
+			divs = browser.find_elements_by_css_selector('div[data-role="recent-number"]');
+			tmp_tuple = tuple([])
 
-				if judge.check_prev_count(i,tmp_tuple):
-					continue
+			for d in divs:
+				tmp_tuple = tmp_tuple + tuple([d.text])
 
-				svgs = table.find_elements_by_css_selector('svg[data-role="Big-road"] svg[data-type="coordinates"]')
-				dataset = copy.deepcopy(none_list)
+			if len(prev_tuple) == 0:
+				number_logs = tmp_tuple
 
-				for svg in svgs:
-					additem = ()
-					child_svg = svg.find_element_by_css_selector('svg[data-type="roadItem"]')
-					name = child_svg.get_attribute('name')
-					spl = name.split(' ')
-					# additem.append(spl[0])
-					v = spl[0][0]
-					if v == sp or v == sb or v == st:
-						additem = additem + tuple([v])
-
-					if len(spl) > 1 and judge.st in spl[1]:
-						if child_svg.text == '':
-							additem = additem + tuple([judge.st])
-						else:
-							additem = additem + tuple([judge.st] * int(child_svg.text))
-
-					dataset[int(svg.get_attribute('data-x'))][int(svg.get_attribute('data-y'))] = additem
-
-				result_list = from_dataset_to_result(dataset)
-				slice_list = result_data_slice(result_list)
-				judge.run(i,table_name,result_list,slice_list)
-				# print_varsize()
-				clear_global_key()
-
-			except Exception as e:
-				print(traceback.format_exc())
-				pass
+			elif prev_tuple != tmp_tuple and prev_tuple[-5:] != tmp_tuple[-5:]:
+				add_number_logs(tmp_tuple)
+				
 			else:
-				pass
-			finally:
-				pass
+				continue
+
+			prev_tuple = tmp_tuple
+			print(number_logs[0:100])
+
+			if time.time() - print_time > 1200:
+				file_print(number_logs)
+				print_time = time.time()
+
+			if len(number_logs) < 40:
+				continue
+
+			if not is_betting:
+				#ベット前
+				target = number_logs[19]
+				if number_logs[20:41].count(target) == 1 and number_logs[0:19].count(target) == 0:
+					now_betnumber = target
+					is_betting = True
+					bet_count = 0
+					message.send_debug_message("次に " + str(now_betnumber) + " がでなければべット開始")
+					message.beep(2000,500)
+			else:
+				#ベット中
+				bet_count = bet_count + 1
+				if number_logs[0] != now_betnumber:
+					if bet_count > 30:
+						lose_count = lose_count + 1
+						message.send_debug_message(str(now_betnumber) + " 損切り")
+						message.lose_beep(2000,500)
+						set_default_value()
+						message.send_debug_message(str(win_count) + "勝 " + str(lose_count) + "敗")
+					else: 
+						bet_price = round(0.1 + 0.1 * (bet_count - 1),1)
+						message.send_debug_message(str(now_betnumber) + " べット $" + str(bet_price))
+						message.beep(2000,500)
+						click_number(now_betnumber,bet_count)
+						last_bet = time.time()
+				else:
+					if bet_count > 1:
+						#あたり
+						win_count = win_count + 1
+						message.send_debug_message(str(now_betnumber) + " 当たり（" + str(bet_count) + "べット目）")
+						message.win_beep(2000,500)
+						message.send_debug_message(str(win_count) + "勝 " + str(lose_count) + "敗")
+					else:
+						message.send_debug_message(str(now_betnumber) + " べット中止")
+					
+					set_default_value()
+
+
+
+
+		except Exception as e:
+			print(traceback.format_exc())
+			pass
+		else:
+			pass
+		finally:
+			pass
+		
+			
 
 	browser.quit()
 	sys.exit()

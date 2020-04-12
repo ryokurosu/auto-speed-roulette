@@ -61,7 +61,25 @@ def beep(freq, dur=100):
         winsound.Beep(freq, dur)
     else:
         # Macの場合には、Macに標準インストールされたplayコマンドを使います.
+        os.system('afplay /System/Library/Sounds/Pop.aiff')
+
+def win_beep(freq, dur=100):
+    if os.name == 'nt':
+        # Windowsの場合は、winsoundというPython標準ライブラリを使います.
+        import winsound
+        winsound.Beep(freq, dur)
+    else:
+        # Macの場合には、Macに標準インストールされたplayコマンドを使います.
         os.system('afplay /System/Library/Sounds/Submarine.aiff')
+
+def lose_beep(freq, dur=100):
+    if os.name == 'nt':
+        # Windowsの場合は、winsoundというPython標準ライブラリを使います.
+        import winsound
+        winsound.Beep(freq, dur)
+    else:
+        # Macの場合には、Macに標準インストールされたplayコマンドを使います.
+        os.system('afplay /System/Library/Sounds/Ping.aiff')
 
 def send_group_message(group_id,message_text):
     try:
@@ -79,7 +97,7 @@ def send_group_message(group_id,message_text):
 def send_all_message(message_text):
     if not is_production:
         return 0
-    beep(2000,500)
+
     print('*******************')
     print(message_text)
     print('*******************')
@@ -120,6 +138,7 @@ def send_all_message(message_text):
 def send_debug_message(message_text):
     if not is_production:
         return 0
+    print(message_text)
         
     try:
         bot.send_message(chat_id=debug_chat_id, text=message_text)
