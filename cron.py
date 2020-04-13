@@ -271,10 +271,10 @@ if __name__ == "__main__":
 			pass
 
 		try:
-			if is_betting == False and (time.time() - start) > 3000:
+			if is_betting == False and (time.time() - start) > 2700:
 				print("Refresh 5s stop ...")
 				time.sleep(5)
-				login()
+				start_browser()
 				initialize()
 				start = time.time()
 				continue
