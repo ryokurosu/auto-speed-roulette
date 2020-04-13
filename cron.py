@@ -271,7 +271,7 @@ if __name__ == "__main__":
 			pass
 
 		try:
-			if is_betting == False and (time.time() - last_bet) > 1800:
+			if is_betting == False and (time.time() - start) > 3000:
 				print("Refresh 5s stop ...")
 				time.sleep(5)
 				login()
