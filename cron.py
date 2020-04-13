@@ -133,6 +133,8 @@ def start_browser():
 	global start_time
 	if browser != "":
 		browser.quit()
+		print("sleep 1 minute ...")
+		time.sleep(60)
 	message_text = "\nTYPE ROULETTE Ver." + version + "\n起動しました。\n" + datetime.now(JST).strftime("%Y/%m/%d %H:%M:%S")
 	start_time = datetime.now(JST)
 	message.send_debug_message(message_text)
@@ -354,6 +356,10 @@ if __name__ == "__main__":
 						message.lose_beep(2000,500)
 						set_default_value()
 						message.send_debug_message(str(win_count) + "勝 " + str(lose_count) + "敗")
+						elems = browser.find_elements_by_css_selector('div[data-role="balance-label"]')
+						if len(elems) > 0:
+							message.send_debug_message(elems[0].text)
+						_
 					else: 
 						bet_price = round(0.1 + 0.1 * (bet_count - 1),1)
 						message.send_debug_message(str(now_betnumber) + " べット $" + str(bet_price))
@@ -367,6 +373,9 @@ if __name__ == "__main__":
 						message.send_debug_message(str(now_betnumber) + " 当たり（" + str(bet_count) + "べット目）")
 						message.win_beep(2000,500)
 						message.send_debug_message(str(win_count) + "勝 " + str(lose_count) + "敗")
+						elems = browser.find_elements_by_css_selector('div[data-role="balance-label"]')
+						if len(elems) > 0:
+							message.send_debug_message(elems[0].text)
 					else:
 						message.send_debug_message(str(now_betnumber) + " べット中止")
 					
