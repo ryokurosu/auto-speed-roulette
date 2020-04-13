@@ -276,6 +276,7 @@ if __name__ == "__main__":
 				time.sleep(5)
 				login()
 				initialize()
+				start = time.time()
 				continue
 		except Exception as e:
 			pass
