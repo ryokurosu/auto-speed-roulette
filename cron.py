@@ -206,12 +206,12 @@ def click_number(number,click_count = 1):
 	if click_count > 40:
 		actions.perform();
 		time.sleep(0.2)
-		actions.perform();
-		time.sleep(0.2)
 
 	if click_count > 30:
 		actions.perform();
 		time.sleep(0.2)
+
+	if click_count > 20:
 		actions.perform();
 		time.sleep(0.2)
 
