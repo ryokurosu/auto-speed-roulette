@@ -47,6 +47,10 @@ is_betting = False
 bet_count = 0
 win_count = 0
 lose_count = 0
+max_martin = 50
+martin_counts = [0] * max_martin
+target_count = 19
+empty_skip = 10
 
 def login():
 	browser.get(startURL)
@@ -197,13 +201,15 @@ def click_number(number,click_count = 1):
 	# for x in range(0,loop):
 	# 	actions.perform();
 	# 	time.sleep(0.2)
-	if click_count > 20:
+	if click_count > 40:
 		actions.perform();
 		time.sleep(0.2)
 		actions.perform();
 		time.sleep(0.2)
 
-	if click_count > 10:
+	if click_count > 30:
+		actions.perform();
+		time.sleep(0.2)
 		actions.perform();
 		time.sleep(0.2)
 
@@ -271,7 +277,7 @@ if __name__ == "__main__":
 			pass
 
 		try:
-			if is_betting == False and (time.time() - start) > 2700:
+			if is_betting == False and (time.time() - start) > 1800:
 				print("Refresh 5s stop ...")
 				time.sleep(5)
 				start_browser()
@@ -326,13 +332,13 @@ if __name__ == "__main__":
 				file_print(number_logs)
 				print_time = time.time()
 
-			if len(number_logs) < 40:
+			if len(number_logs) < (empty_skip + target_count + 15):
 				continue
 
 			if not is_betting:
 				#ベット前
-				target = number_logs[19]
-				if number_logs[20:41].count(target) == 1 and number_logs[0:19].count(target) == 0:
+				target = number_logs[target_count + empty_skip]
+				if number_logs[(target_count + 1 + empty_skip):(target_count + empty_skip + 16)].count(target) == 1 and number_logs[0:(target_count + empty_skip)].count(target) == 0:
 					now_betnumber = target
 					is_betting = True
 					bet_count = 0
@@ -342,7 +348,7 @@ if __name__ == "__main__":
 				#ベット中
 				bet_count = bet_count + 1
 				if number_logs[0] != now_betnumber:
-					if bet_count > 30:
+					if bet_count > max_martin:
 						lose_count = lose_count + 1
 						message.send_debug_message(str(now_betnumber) + " 損切り")
 						message.lose_beep(2000,500)

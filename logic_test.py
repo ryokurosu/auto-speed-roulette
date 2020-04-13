@@ -27,22 +27,19 @@ from ast import literal_eval
 
 
 message.set_debug()
-judge.set_default_val(1)
-
 f = open('logic_test.txt', 'r')
 line = f.readline()
 
 while line:
 	tmp = line.strip()
 	l = literal_eval(tmp)
-	for x in range(len(l)):
-		result_list = l[0:(x+1)]
-		slice_list = cron.result_data_slice(result_list)
-		if len(slice_list) >= 3:
-			judge.run(0,"テスターテーブル",result_list,slice_list)
+	number_logs = tuple([])
+	judge.set_default_value()
+	for x in range(len(l) - 1,-1,-1):
+		number_logs = tuple(l[x]) + number_logs
+		judge.run(number_logs)
 	
 	line = f.readline()
 f.close()
 judge.test_result()
-# judge.exec(i,table_name,result_list,slice_list)
 			

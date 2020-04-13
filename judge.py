@@ -27,30 +27,19 @@ handler.setFormatter(Formatter("-----------------------\n%(asctime)s %(message)s
 logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
-message_p = 'Player'
-message_b = 'Banker'
-message_w = 'Wait'
-sp = 'P'
-sb = 'B'
-st = 'T'
-sw = 'W'
-normal_bet = {sp:sp,sb:sb,st:sb,sw:sw}
-reverse_bet = {sp:sb,sb:sp,st:sb,sw:sw}
-message_bet = {sp:message_p,sb:message_b,sw:message_w}
-type_normal = 'normal'
-type_mirror = 'mirror'
-type_normal_mirror = 'normal_mirror'
-prev_count = []
-bet_type = []
-is_betting = []
-bet_target = []
-debug_tries = [0] * 9
+number_logs = tuple([])
+prev_tuple = tuple([])
+now_betnumber = 10000
+is_betting = False
+bet_count = 0
+win_count = 0
+lose_count = 0
+max_martin = 50
+martin_counts = [0] * max_martin
+target_count = 19
+empty_skip = 10
 
-total_games = 0
-win_games = 0
-lose_games = 0
-tie_games = 0
-shuffle_games = 0
+
 
 def logger_set():
 	global logger
@@ -66,19 +55,6 @@ def logger_set():
 	logger.addHandler(handler)
 	logger.propagate = False
 	return logger
-
-def set_default_val(length):
-	global is_betting
-	global prev_count
-	global try_count
-	global bet_type
-	global bet_target
-	is_betting = [False] * length
-	prev_count = [None] * length
-	try_count = [0] * length
-	bet_type = [type_normal] * length
-	bet_target = [tuple([])] * length
-	logger_set()
 
 def try_to_default(i):
 	global is_betting
@@ -312,139 +288,66 @@ def check_prev_count(i,tmp_tuple):
 	return False
 
 def test_result():
-	global debug_tries
-	global total_games
-	global win_games
-	global tie_games
-	global lose_games
-	global shuffle_games
-
-	for x in range(len(debug_tries) - 1, -1, -1):
-		for k in range(x - 1 , -1, -1):
-			debug_tries[k] = debug_tries[k] - debug_tries[x]
+	global win_count
+	global lose_count
+	global martin_counts
 
 	print("------テスト結果------")
-	for i in range(len(debug_tries)):
-		print( "マーチン" + str(i) + " : " + str(debug_tries[i]))
-	print('total_games : ' + str(total_games))
-	print('win_games : ' + str(win_games))
-	print('lose_games : ' + str(lose_games))
-	print('tie_games : ' + str(tie_games))
-	print('shuffle_games : ' + str(shuffle_games))
+	for i in range(len(martin_counts)):
+		print(str(i + 1) + "べット目 : " + str(martin_counts[i]))
+	print('win_games : ' + str(win_count))
+	print('lose_games : ' + str(lose_count))
 
-def run(i,table_name,result_list,slice_list):
+def set_default_value():
+	global now_betnumber
 	global is_betting
-	global try_count
-	global bet_type
-	global total_games
+	global bet_count
+	now_betnumber = 10000
+	is_betting = False
+	bet_count = 0
 
-	if len(slice_list) < 2:
-		#dataが0個
-		if try_count[i] > 0:
-			shuffle_wait_message(i,table_name,slice_list)
-		return 0;
+def run(data):
+	global number_logs
+	global is_betting
+	global now_betnumber
+	global win_count
+	global lose_count
+	global bet_count
+	global martin_counts
+	global target_count
+	global max_martin
+	number_logs = data
+	if len(number_logs) < (empty_skip + target_count + 15):
+		return 0
 
-	now = slice_list[-1]
-
-	if try_count[i] == 1:
-		#ゲーム数の計測
-		total_games = total_games + 1
-
-	if not is_betting[i] and is_skip(result_list,slice_list):
-		return 0;
-
-			
-	last = slice_list[-2]
-
-	slice_l = len(now)
-	tmp_index = -1 * try_count[i]
-
-	try_target = tuple([])
-	if try_count[i] > 0:
-		tmp_index = -1 * try_count[i]
-		try_target = result_list[tmp_index:]
-
-	print(table_name + " マーチン" + str(try_count[i]))
-	print(try_target)
-	print(bet_target[i])
-
-	if not is_betting[i] and try_count[i] == 0 and slice_l == 1:
-		check = notice_check(slice_list)
-		if check == type_normal or check == type_mirror or check == type_normal_mirror:
-			notice_message(i,check,table_name,slice_list)
-
-	elif is_betting[i] and try_count[i] == 0:
-
-		if bet_type[i] == type_normal:
-			if check_is_normal(slice_list,try_target,bet_target[i]):
-				bet_message(i,table_name,last[slice_l],slice_list)
-				return 0;
+	if not is_betting:
+		target = number_logs[target_count + empty_skip]
+		if number_logs[(target_count + 1 + empty_skip):(target_count + empty_skip + 16)].count(target) == 1 and number_logs[0:(target_count + empty_skip)].count(target) == 0:
+			now_betnumber = target
+			is_betting = True
+			bet_count = 0
+	else:
+		#ベット中
+		bet_count = bet_count + 1
+		if number_logs[0] != now_betnumber:
+			if bet_count > max_martin:
+				lose_count = lose_count + 1
+				print(str(now_betnumber) + " 損切り")
+				set_default_value()
+				print(str(win_count) + "勝 " + str(lose_count) + "敗")
+			else: 
+				bet_price = round(0.1 + 0.1 * (bet_count - 1),1)
+				print(str(now_betnumber) + " べット $" + str(bet_price))
+		else:
+			if bet_count > 1:
+				#あたり
+				win_count = win_count + 1
+				martin_counts[bet_count - 1] = martin_counts[bet_count - 1] + 1
+				print(str(now_betnumber) + " 当たり（" + str(bet_count) + "べット目）")
+				print(str(win_count) + "勝 " + str(lose_count) + "敗")
+			else:
+				print(str(now_betnumber) + " べット中止")
 				
-		elif now[0] == last[-1]:
-			#normal ではなく mirrorの可能性
-			bet_type[i] = type_mirror
-
-
-		if bet_type[i] == type_mirror:
-			if check_is_mirror(slice_list,try_target,bet_target[i]):
-				bet_message(i,table_name,last[slice_l - 2],slice_list)
-				return 0;
-
-		elif now[0] == last[1]:
-			#mirror ではなく normal_mirrorの可能性
-			bet_type[i] = type_normal_mirror
-
-		if bet_type[i] == type_normal_mirror:
-			if check_is_normal_mirror(slice_list,try_target,bet_target[i]):
-				bet_message(i,table_name,last[slice_l],slice_list)
-				return 0;
-
-		wait_message(i,table_name,slice_list)
-		return 0;
-
-	elif is_betting[i] and try_count[i] <= 3:
-
-		if win_or_false(try_target,bet_target[i]):
-			win_message(i,table_name,slice_list)
-		else:
-			if now[-1] == st and ( try_count[i] == 1 or try_count[i] == 2 ):
-				tie_wait_message(i,table_name,slice_list)
-				return 0
-
-			if bet_type[i] == type_normal or bet_type[i] == type_normal_mirror:
-				target = last[slice_l]
-			elif bet_type[i] == type_mirror:
-				target = last[slice_l - 2]
-
-			bet_message(i,table_name,target,slice_list)
-		
-
-	elif is_betting[i] and try_count[i] == 4:
-
-		if win_or_false(try_target,bet_target[i]):
-			win_message(i,table_name,slice_list)
-		else:
-			bet_message(i,table_name,now[0],slice_list)
-
-	elif is_betting[i] and try_count[i] >= 5 and try_count[i] <= 8:
-
-		if win_or_false(try_target,bet_target[i]):
-			win_message(i,table_name,slice_list)
-		elif last[slice_l] == st:
-			#前列がタイ
-			game_1_wait_message(i,table_name,slice_list)
-		else:
-			bet_message(i,table_name,last[slice_l],slice_list)
-
-
-
-	elif try_count[i] == 9:
-		if win_or_false(try_target,bet_target[i]):
-			win_message(i,table_name,slice_list)
-		elif is_betting[i]:
-			lose_message(i,table_name,slice_list)
-				
-		try_to_default(i)
-
+			set_default_value()
 
 
