@@ -47,7 +47,7 @@ is_betting = False
 bet_count = 0
 win_count = 0
 lose_count = 0
-max_martin = 50
+max_martin = 30
 martin_counts = [0] * max_martin
 target_count = 19
 empty_skip = 10
@@ -203,15 +203,11 @@ def click_number(number,click_count = 1):
 	# for x in range(0,loop):
 	# 	actions.perform();
 	# 	time.sleep(0.2)
-	if click_count > 40:
-		actions.perform();
-		time.sleep(0.2)
-
-	if click_count > 30:
-		actions.perform();
-		time.sleep(0.2)
-
 	if click_count > 20:
+		actions.perform();
+		time.sleep(0.2)
+
+	if click_count > 10:
 		actions.perform();
 		time.sleep(0.2)
 
@@ -359,7 +355,7 @@ if __name__ == "__main__":
 						elems = browser.find_elements_by_css_selector('div[data-role="balance-label"]')
 						if len(elems) > 0:
 							message.send_debug_message(elems[0].text)
-						_
+						
 					else: 
 						bet_price = round(0.1 + 0.1 * (bet_count - 1),1)
 						message.send_debug_message(str(now_betnumber) + " べット $" + str(bet_price))
