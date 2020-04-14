@@ -129,13 +129,13 @@ def click_continue():
 	browser.switch_to.frame(browser.find_element_by_id('evolution_wrapper'))
 	print('change frame to [#evolution_wrapper]')
 
-def start_browser():
+def start_browser(sleep_time = 0):
 	global browser
 	global start_time
 	if browser != "":
 		browser.quit()
-		print("sleep 1 minute ...")
-		time.sleep(60)
+		print("sleep " + str(sleep_time) + " seconds ...")
+		time.sleep(sleep_time)
 	message_text = "\nTYPE ROULETTE Ver." + version + "\n起動しました。\n" + datetime.now(JST).strftime("%Y/%m/%d %H:%M:%S")
 	start_time = datetime.now(JST)
 	message.send_debug_message(message_text)
@@ -281,7 +281,7 @@ if __name__ == "__main__":
 			if is_betting == False and (time.time() - start) > 12000:
 				print("Refresh 5s stop ...")
 				time.sleep(5)
-				start_browser()
+				start_browser(60)
 				initialize()
 				start = time.time()
 				continue
@@ -379,8 +379,7 @@ if __name__ == "__main__":
 						continue_win = continue_win + 1
 						if continue_win >= 3:
 							message.send_debug_message('連続3勝なので時間を空けます。')
-							time.sleep(1800)
-							start_browser()
+							start_browser(1800)
 							initialize()
 							start = time.time()
 							continue
