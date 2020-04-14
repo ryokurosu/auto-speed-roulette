@@ -51,6 +51,7 @@ max_martin = 30
 martin_counts = [0] * max_martin
 target_count = 19
 empty_skip = 10
+continue_win = 0
 
 def login():
 	browser.get(startURL)
@@ -351,6 +352,7 @@ if __name__ == "__main__":
 						message.send_debug_message(str(now_betnumber) + " 損切り")
 						message.lose_beep(2000,500)
 						set_default_value()
+						continue_win = 0
 						message.send_debug_message(str(win_count) + "勝 " + str(lose_count) + "敗")
 						elems = browser.find_elements_by_css_selector('div[data-role="balance-label"]')
 						if len(elems) > 0:
@@ -372,6 +374,15 @@ if __name__ == "__main__":
 						elems = browser.find_elements_by_css_selector('div[data-role="balance-label"]')
 						if len(elems) > 0:
 							message.send_debug_message(elems[0].text)
+						continue_win = continue_win + 1
+						if continue_win >= 3:
+							print('連続3勝なので時間を空けます。')
+							time.sleep(1800)
+							start_browser()
+							initialize()
+							start = time.time()
+							continue_win = 0
+				continue
 					else:
 						message.send_debug_message(str(now_betnumber) + " べット中止")
 					
