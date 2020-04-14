@@ -383,7 +383,7 @@ if __name__ == "__main__":
 							start_browser()
 							initialize()
 							start = time.time()
-				continue
+							continue
 					else:
 						message.send_debug_message(str(now_betnumber) + " べット中止")
 					
