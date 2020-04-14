@@ -378,7 +378,7 @@ if __name__ == "__main__":
 							message.send_debug_message(elems[0].text)
 						continue_win = continue_win + 1
 						if continue_win >= 3:
-							print('連続3勝なので時間を空けます。')
+							message.send_debug_message('連続3勝なので時間を空けます。')
 							time.sleep(1800)
 							start_browser()
 							initialize()
