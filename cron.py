@@ -167,6 +167,7 @@ def initialize():
 	global bet_count
 	global start
 	global last_bet
+	global continue_win
 	number_logs = tuple([])
 	prev_tuple = tuple([])
 	now_betnumber = 10000
@@ -174,6 +175,7 @@ def initialize():
 	bet_count = 0
 	start = time.time()
 	last_bet = time.time()
+	continue_win = 0
 
 def set_default_value():
 	global now_betnumber
@@ -276,7 +278,7 @@ if __name__ == "__main__":
 			pass
 
 		try:
-			if is_betting == False and (time.time() - start) > 10800:
+			if is_betting == False and (time.time() - start) > 12000:
 				print("Refresh 5s stop ...")
 				time.sleep(5)
 				start_browser()
@@ -381,7 +383,6 @@ if __name__ == "__main__":
 							start_browser()
 							initialize()
 							start = time.time()
-							continue_win = 0
 				continue
 					else:
 						message.send_debug_message(str(now_betnumber) + " べット中止")
