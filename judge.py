@@ -37,7 +37,7 @@ lose_count = 0
 max_martin = 30
 martin_counts = [0] * max_martin
 target_count = 19
-empty_skip = 30
+empty_skip = 20
 
 bet_balance = 0
 win_balance = 0
