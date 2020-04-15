@@ -34,11 +34,13 @@ is_betting = False
 bet_count = 0
 win_count = 0
 lose_count = 0
-max_martin = 50
+max_martin = 30
 martin_counts = [0] * max_martin
 target_count = 19
 empty_skip = 10
 
+bet_balance = 0
+win_balance = 0
 
 
 def logger_set():
@@ -291,12 +293,16 @@ def test_result():
 	global win_count
 	global lose_count
 	global martin_counts
+	global win_balance
+	global bet_balance
 
 	print("------テスト結果------")
 	for i in range(len(martin_counts)):
 		print(str(i + 1) + "べット目 : " + str(martin_counts[i]))
 	print('win_games : ' + str(win_count))
 	print('lose_games : ' + str(lose_count))
+	print('bet_balance : $' + str(bet_balance))
+	print('win_balance : $' + str(win_balance))
 
 def set_default_value():
 	global now_betnumber
@@ -316,6 +322,8 @@ def run(data):
 	global martin_counts
 	global target_count
 	global max_martin
+	global bet_balance
+	global win_balance
 	number_logs = data
 	if len(number_logs) < (empty_skip + target_count + 15):
 		return 0
@@ -335,12 +343,26 @@ def run(data):
 				print(str(now_betnumber) + " 損切り")
 				set_default_value()
 				print(str(win_count) + "勝 " + str(lose_count) + "敗")
-			else: 
+			else:
 				bet_price = round(0.1 + 0.1 * (bet_count - 1),1)
+				if bet_count <= 15:
+					add = 1
+				elif bet_count <= 25:
+					add = 2
+				else:
+					add = 3
+				bet_balance = bet_balance + add
 				print(str(now_betnumber) + " べット $" + str(bet_price))
 		else:
 			if bet_count > 1:
 				#あたり
+				if bet_count <= 16:
+					win_add = 1 * 36
+				elif bet_count <= 26:
+					win_add = 2 * 36
+				else:
+					win_add = 3 * 36
+				win_balance = win_balance + win_add
 				win_count = win_count + 1
 				martin_counts[bet_count - 1] = martin_counts[bet_count - 1] + 1
 				print(str(now_betnumber) + " 当たり（" + str(bet_count) + "べット目）")

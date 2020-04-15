@@ -206,11 +206,11 @@ def click_number(number,click_count = 1):
 	# for x in range(0,loop):
 	# 	actions.perform();
 	# 	time.sleep(0.2)
-	if click_count > 20:
+	if click_count > 25:
 		actions.perform();
 		time.sleep(0.2)
 
-	if click_count > 10:
+	if click_count > 15:
 		actions.perform();
 		time.sleep(0.2)
 
@@ -370,7 +370,7 @@ if __name__ == "__main__":
 					if bet_count > 1:
 						#あたり
 						win_count = win_count + 1
-						message.send_debug_message(str(now_betnumber) + " 当たり（" + str(bet_count) + "べット目）")
+						message.send_debug_message(str(now_betnumber) + " 当たり（" + str(bet_count - 1) + "べット目）")
 						message.win_beep(2000,500)
 						message.send_debug_message(str(win_count) + "勝 " + str(lose_count) + "敗")
 						elems = browser.find_elements_by_css_selector('div[data-role="balance-label"]')
