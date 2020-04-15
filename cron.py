@@ -252,16 +252,16 @@ if __name__ == "__main__":
 		finally:
 			pass
 
-		try:
-			if loopcount % 300 == 0:
-				click_continue()
+		# try:
+		# 	if loopcount % 300 == 0:
+		# 		click_continue()
 				
-		except Exception as e:
-			pass
-		else:
-			pass
-		finally:
-			pass
+		# except Exception as e:
+		# 	pass
+		# else:
+		# 	pass
+		# finally:
+		# 	pass
 
 
 		try:
