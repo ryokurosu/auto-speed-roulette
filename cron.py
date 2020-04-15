@@ -50,7 +50,7 @@ lose_count = 0
 max_martin = 30
 martin_counts = [0] * max_martin
 target_count = 19
-empty_skip = 10
+empty_skip = 30
 continue_win = 0
 
 def login():
